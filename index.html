@@ -1,0 +1,1560 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Maco Board</title>
+<meta name="description" content="Daily profit on XO Market's markets and convictions: who locked in the most today, the race of the leaders, and your rank.">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Maco Board: who's up on XO markets and convictions?">
+<meta property="og:description" content="Every day on XO Market's markets and convictions: who locked in the most profit, the race of the leaders, and your rank.">
+<meta property="og:image" content="https://maco-board.vercel.app/og.png?v=1">
+<meta property="og:url" content="https://maco-board.vercel.app/">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Maco Board: who's up on XO markets and convictions?">
+<meta name="twitter:description" content="Every day on XO Market's markets and convictions: who locked in the most profit, the race of the leaders, and your rank.">
+<meta name="twitter:image" content="https://maco-board.vercel.app/og.png?v=1">
+<meta name="theme-color" content="#f5f5f5">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect width='64' height='64' rx='16' fill='%23a293ff'/><path d='M17 44V32M27 44V22M37 44V27M47 44V16' fill='none' stroke='%23ffffff' stroke-width='6' stroke-linecap='round'/></svg>">
+<link rel="preload" href="fonts/open-runde-latin-600-normal.woff2" as="font" type="font/woff2" crossorigin>
+<style>
+  @font-face { font-family: "Open Runde"; font-weight: 400; font-display: swap; src: url(fonts/open-runde-latin-400-normal.woff2) format("woff2"); }
+  @font-face { font-family: "Open Runde"; font-weight: 500; font-display: swap; src: url(fonts/open-runde-latin-500-normal.woff2) format("woff2"); }
+  @font-face { font-family: "Open Runde"; font-weight: 600; font-display: swap; src: url(fonts/open-runde-latin-600-normal.woff2) format("woff2"); }
+  @font-face { font-family: "Open Runde"; font-weight: 700; font-display: swap; src: url(fonts/open-runde-latin-700-normal.woff2) format("woff2"); }
+
+  /* tokens follow the XO app (beta.xo.market) */
+  :root {
+    color-scheme: light;
+    --page: #f5f5f5; --card: #fff; --control: #f4f4f5; --control-hover: #ebebeb;
+    --line: #e6e8ea; --line-soft: rgba(0,0,0,.06);
+    --ink: #101114; --ink-2: #6e6e6e; --ink-3: #6b7078;
+    --up: #ff87a6; --up-ink: #7a1230; --up-text: #c12c57; --up-soft: #fff0f4;
+    --down: #a293ff; --down-ink: #2a1a6e; --down-text: #6941c6; --down-soft: #f1edff; --down-line: #b9a5e9;
+    --pos: #0f7a42; --pos-soft: #eaf7f0; --neg: #c0403d; --neg-soft: #fff0f0;
+    --cta: #2fc04a; --cta-ink: #000;
+    --shadow: 0 1px 2px rgba(16,17,20,.05);
+  }
+  :root[data-theme="dark"] {
+    color-scheme: dark;
+    --page: #121213; --card: #1b1b1d; --control: #222224; --control-hover: #2b2b2e;
+    --line: #323235; --line-soft: #262629;
+    --ink: #f2f2f3; --ink-2: #bcbcc2; --ink-3: #a2a2ab;
+    --up-text: #ffabc4; --up-soft: #302127;
+    --down-text: #c4b6ff; --down-soft: #292533; --down-line: #463c6e;
+    --pos: #74dba4; --pos-soft: #1d2a23; --neg: #ff8f8a; --neg-soft: #2e2020;
+    --shadow: 0 1px 3px rgba(0,0,0,.16);
+  }
+
+  * { box-sizing: border-box; }
+  [hidden] { display: none !important; }
+  html { -webkit-text-size-adjust: 100%; }
+  body { margin: 0; background: var(--page); color: var(--ink); font: 400 14px/1.45 "Open Runde", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif; -webkit-font-smoothing: antialiased; }
+  a { color: inherit; }
+  button, input { font: inherit; color: inherit; }
+  h1, h2, h3, p { margin: 0; }
+  .num { font-variant-numeric: tabular-nums; }
+  .wrap { max-width: 1120px; margin: 0 auto; padding: 0 16px; }
+  section { scroll-margin-top: 72px; }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 16px; box-shadow: var(--shadow); }
+  .pos { color: var(--pos); } .neg { color: var(--neg); } .muted { color: var(--ink-3); }
+  :focus-visible { outline: 2px solid var(--down-text); outline-offset: 2px; }
+
+  /* ---------- top bar ---------- */
+  .bar { position: sticky; top: 0; z-index: 20; background: var(--card); border-bottom: 1px solid var(--line); }
+  .bar .wrap { display: flex; align-items: center; gap: 12px; height: 56px; }
+  .brand { display: flex; align-items: center; gap: 9px; font-weight: 700; font-size: 17px; letter-spacing: -.01em; text-decoration: none; }
+  .brand svg { width: 26px; height: 26px; flex: none; }
+  .views { flex: none; position: relative; }
+  .views button { position: relative; z-index: 1; height: 30px; padding: 0 12px; font-size: 13px; }
+  @media (max-width: 440px) { .brand .bt { display: none; } }
+  @media (max-width: 340px) { .views .trophy { display: none; } }
+  button.chip { border: 0; cursor: pointer; font: inherit; font-size: 12px; font-weight: 600; }
+  button.chip:hover { filter: brightness(.96); }
+  .c-meter i { background: var(--up); }
+  .c-cta { display: grid; grid-template-columns: auto minmax(0,1fr); gap: 10px; align-items: stretch; }
+  @media (max-width: 560px) { .c-cta { grid-template-columns: minmax(0,1fr); } }
+  /* XO's own pink, like Up and Sign up in the app */
+  .c-btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; height: 46px; padding: 0 20px; border-radius: 12px; background: var(--up); color: var(--up-ink); font-weight: 700; font-size: 15px; text-decoration: none; white-space: nowrap; transition: filter .15s, transform .15s; }
+  .c-btn svg { width: 16px; height: 16px; }
+  .c-btn:hover { filter: brightness(.96); }
+  .c-btn:active { transform: scale(.98); }
+  .c-cta { grid-template-columns: minmax(0,1fr); }
+  @media (max-width: 860px) { #c-prizes { white-space: normal; } }
+  /* the Join reminder sits under the round card, beside the contest card */
+  .nudge { padding: 16px 20px; display: flex; flex-direction: column; gap: 6px; justify-content: center; }
+  .nudge-head { display: flex; align-items: center; gap: 10px; }
+  .nudge-head b { font-size: 15px; font-weight: 700; }
+  .nudge-ic { width: 22px; height: 22px; border-radius: 50%; background: var(--up-soft); color: var(--up-text); display: grid; place-items: center; font-weight: 800; font-size: 14px; flex: none; }
+  .nudge p { font-size: 13px; color: var(--ink-2); line-height: 1.45; }
+  .nudge-link { font-weight: 700; white-space: nowrap; color: var(--up-text); text-decoration: none; }
+  .nudge-link:hover { text-decoration: underline; }
+  @media (min-width: 861px) {
+    :root[data-view="comp"] .hero { grid-template-rows: auto 1fr; }
+    :root[data-view="comp"] .hero > .intro.v-comp { grid-row: 1 / span 2; }
+    :root[data-view="comp"] .hero > .nudge { grid-column: 2; }
+  }
+  /* in the competition view the round card keeps its own height instead of matching the contest card */
+  :root[data-view="comp"] .live { align-self: start; justify-content: flex-start; gap: 18px; }
+  /* the contest's rules, from XO */
+  .rules-card { margin-top: 16px; padding: 16px 20px; }
+  .rules-card h2 { font-size: 15px; font-weight: 600; margin-bottom: 10px; }
+  .rules { display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); border: 1px solid var(--line); border-radius: 12px; overflow: hidden; }
+  .rules > div { padding: 10px 14px; min-width: 0; }
+  .rules > div + div { border-left: 1px solid var(--line); }
+  .rules small { display: block; font-size: 11px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--ink-3); }
+  .rules b { display: block; font-size: 14px; font-weight: 600; margin-top: 2px; }
+  @media (max-width: 860px) { .rules { grid-template-columns: 1fr 1fr; } .rules > div:nth-child(odd) { border-left: 0; } .rules > div:nth-child(n+3) { border-top: 1px solid var(--line); } }
+  .c-podium .pod { cursor: default; }
+  .place.p1 { background: #C7B583; color: #3A331F; box-shadow: inset 0 0 0 1.5px #867852; }
+  .place.p2 { background: #B7BABE; color: #2C2E30; box-shadow: inset 0 0 0 1.5px #75787C; }
+  .place.p3 { background: #B4967D; color: #3A2E22; box-shadow: inset 0 0 0 1.5px #6E5A49; }
+  .rk .place { width: 24px; height: 24px; border-radius: 7px; display: grid; place-items: center; font-size: 12.5px; font-weight: 700; }
+  .bar .sp { flex: 1; }
+  .icon-btn { width: 36px; height: 36px; border-radius: 10px; border: 0; background: var(--control); display: grid; place-items: center; cursor: pointer; }
+  .icon-btn:hover { background: var(--control-hover); }
+  .icon-btn svg { width: 17px; height: 17px; }
+  /* flat buttons, as in the current XO app: no outline, no offset shadow */
+  .cta { display: inline-flex; align-items: center; justify-content: center; gap: 6px; height: 40px; padding: 0 16px; border-radius: 12px; background: var(--cta); color: var(--cta-ink); border: 0; font-weight: 600; text-decoration: none; white-space: nowrap; cursor: pointer; transition: filter .12s, transform .08s; }
+  .cta:hover, .btn:hover { filter: brightness(.95); }
+  .cta:active, .btn:active { transform: scale(.98); }
+  .btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; height: 38px; padding: 0 14px; border-radius: 10px; background: var(--control-hover); border: 0; font-weight: 600; font-size: 13px; cursor: pointer; text-decoration: none; white-space: nowrap; transition: filter .12s, transform .08s; }
+  .btn.pink { background: var(--up); color: var(--up-ink); }
+  .btn[disabled] { opacity: .55; pointer-events: none; }
+
+  /* ---------- hero ---------- */
+  .hero { display: grid; grid-template-columns: minmax(0,1.5fr) minmax(0,1fr); gap: 16px; margin-top: 20px; }
+  .lede { font-size: 15px; color: var(--ink-2); max-width: 52ch; }
+  .intro { padding: 24px; display: flex; flex-direction: column; gap: 16px; justify-content: space-between; }
+  .eyebrow { display: flex; flex-wrap: wrap; gap: 6px; }
+  .chip { display: inline-flex; align-items: center; gap: 6px; height: 26px; padding: 0 10px; border-radius: 8px; font-size: 12px; font-weight: 600; background: var(--control); color: var(--ink-2); white-space: nowrap; }
+  .chip.up { background: var(--up-soft); color: var(--up-text); }
+  .chip.down { background: var(--down-soft); color: var(--down-text); }
+  .chip .btc { width: 14px; height: 14px; border-radius: 4px; background: #f7931a; color: #fff; font-size: 10px; display: grid; place-items: center; font-weight: 700; }
+  h1 { font-size: clamp(28px, 4.2vw, 40px); line-height: 1.08; font-weight: 700; letter-spacing: -.02em; text-wrap: balance; }
+  h1 em { font-style: normal; color: var(--up-text); }
+  .facts { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); border: 1px solid var(--line); border-radius: 12px; }
+  .today { display: flex; flex-direction: column; gap: 8px; }
+  .today-head { display: flex; align-items: baseline; gap: 8px; }
+  .today-head b { font-size: 14px; font-weight: 600; }
+  .today-head small { font-size: 12.5px; color: var(--ink-2); }
+  .fact { padding: 12px 14px; min-width: 0; }
+  .fact + .fact { border-left: 1px solid var(--line); }
+  .fact small { display: block; font-size: 12px; color: var(--ink-3); font-weight: 500; }
+  .fact b { display: block; font-size: 16px; font-weight: 600; margin-top: 2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .fact b.tba { color: var(--ink-3); }
+
+  .live { padding: 24px; display: flex; flex-direction: column; justify-content: space-between; gap: 14px; position: relative; overflow: hidden; } /* clips the result panel */
+  .live-head { display: flex; align-items: center; gap: 10px; }
+  .live-head .btc-lg { width: 40px; height: 40px; border-radius: 10px; background: #f7931a; color: #fff; display: grid; place-items: center; font-size: 22px; font-weight: 700; flex: none; }
+  .live-head small { display: block; font-size: 12px; color: var(--ink-2); }
+  .live-head b { display: block; font-size: 16px; font-weight: 600; line-height: 1.2; }
+  .live-dot { margin-left: auto; display: inline-flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 700; letter-spacing: .06em; color: var(--up-text); }
+  .live-dot i { width: 8px; height: 8px; border-radius: 50%; background: var(--up); animation: blink 1.6s ease-in-out infinite; }
+  @keyframes blink { 50% { opacity: .35; } }
+  .live-now { display: flex; flex-direction: column; gap: 10px; }
+  .live-grid { display: grid; grid-template-columns: 1fr auto; gap: 12px; align-items: end; }
+  .live-grid small, .past-wrap > small { display: block; font-size: 12px; color: var(--ink-2); font-weight: 500; }
+  .live-grid .v { font-size: 30px; font-weight: 700; letter-spacing: -.02em; line-height: 1.15; }
+  .live-grid .clock { text-align: right; }
+  .meter { height: 6px; border-radius: 99px; background: var(--control); overflow: hidden; }
+  .meter i { display: block; height: 100%; width: 0; border-radius: 99px; background: var(--up); transition: width 1s linear; }
+  .past-wrap { display: flex; flex-direction: column; gap: 6px; }
+  .past { display: grid; grid-template-columns: repeat(5, minmax(0,1fr)); gap: 6px; min-height: 46px; }
+  .past .r { padding: 6px 4px; border-radius: 10px; font-size: 12px; font-weight: 600; display: flex; flex-direction: column; align-items: center; gap: 1px; background: var(--control); color: var(--ink-2); line-height: 1.3; white-space: nowrap; }
+  .past .r i { font-style: normal; font-size: 9px; margin-right: 3px; }
+  .past .r em { font-style: normal; font-size: 11.5px; font-weight: 600; }
+  .past .r.u i, .past .r.u em { color: var(--up-text); } .past .r.d i, .past .r.d em { color: var(--down-text); }
+  .odds { display: flex; flex-direction: column; gap: 10px; }
+  .odds-head { display: flex; justify-content: space-between; font-size: 12px; color: var(--ink-2); font-weight: 500; }
+  .split { display: flex; gap: 3px; height: 8px; }
+  .split i { display: block; height: 100%; border-radius: 99px; background: var(--up); width: 50%; transition: width .6s ease; min-width: 8px; }
+  .split i + i { background: var(--down); flex: 1; width: auto; }
+  .sides { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 6px; }
+  .side { height: 52px; border-radius: 14px; display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 16px; font-weight: 600; text-decoration: none; white-space: nowrap; transition: filter .12s, transform .08s; }
+  .side b { font-weight: 700; }
+  .side b:empty { display: none; }
+  .side.up { background: var(--up); color: var(--up-ink); }
+  .side.down { background: var(--down); color: var(--down-ink); }
+  .side:hover { filter: brightness(.95); }
+  .side:active { transform: scale(.98); }
+
+  /* ---------- totals ---------- */
+  .totals { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); border: 1px solid var(--line); border-radius: 12px; overflow: hidden; }
+  .total { padding: 14px 18px; min-width: 0; }
+  .total + .total { border-left: 1px solid var(--line); }
+  .total small { display: block; font-size: 12px; color: var(--ink-3); font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .total b { font-size: 20px; font-weight: 700; letter-spacing: -.01em; }
+
+  /* ---------- race chart ---------- */
+  .race { margin-top: 16px; padding: 16px 16px 12px; }
+  .race-head { display: flex; justify-content: space-between; align-items: flex-end; gap: 12px; flex-wrap: wrap; }
+  .race-head h2 { font-size: 18px; font-weight: 700; letter-spacing: -.01em; }
+  .race-head p { font-size: 13px; color: var(--ink-2); margin-top: 2px; }
+  .race-ctl { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+  .seg { display: inline-flex; background: var(--control); border-radius: 10px; padding: 3px; }
+  .seg button { height: 28px; padding: 0 10px; border: 0; background: none; border-radius: 8px; font-weight: 600; font-size: 12.5px; color: var(--ink-2); cursor: pointer; white-space: nowrap; }
+  .seg button[aria-pressed="true"] { color: var(--ink); } /* the white highlight behind it is .pill */
+  .race-ctl .btn { height: 34px; }
+  .race-box { position: relative; height: 440px; margin-top: 12px; }
+  .race-box canvas { width: 100%; height: 100%; display: block; touch-action: pan-y; }
+  .race-legend { display: flex; gap: 6px 10px; flex-wrap: wrap; font-size: 12px; color: var(--ink-3); margin-top: 6px; }
+  tr.sep td { text-align: left; padding: 10px 16px 8px; font-size: 12px; font-weight: 600; color: var(--ink-3); background: var(--control); border-top: 1px solid var(--line); }
+  .msep { padding: 10px 14px 6px; font-size: 12px; font-weight: 600; color: var(--ink-3); background: var(--control); }
+  #c-table .tk { font-weight: 600; font-size: 12px; border-radius: 99px; padding: 3px 9px; white-space: nowrap; }
+  .race-legend .tk { font-weight: 600; font-size: 11px; border-radius: 99px; padding: 2px 7px; }
+  .tk.ok { background: var(--pos-soft); color: var(--pos); } .tk.near { background: var(--down-soft); color: var(--down-text); }
+  .tk.need { background: var(--up-soft); color: var(--up-text); } .tk.out { background: var(--control); color: var(--ink-3); }
+  .race-legend i.dash { display: inline-block; width: 18px; height: 0; border-top: 2px dashed var(--ink-3); vertical-align: middle; margin-right: 6px; }
+
+  /* ---------- find me ---------- */
+  .find { margin-top: 16px; padding: 16px; position: relative; }
+  .find-row { display: flex; gap: 10px; align-items: center; }
+  .find label { font-weight: 600; font-size: 15px; white-space: nowrap; }
+  .field { flex: 1; position: relative; min-width: 0; }
+  .field input { width: 100%; height: 44px; border-radius: 12px; border: 1px solid var(--line); background: var(--control); padding: 0 14px 0 38px; font-size: 15px; font-weight: 500; outline: none; }
+  .field input:focus { border-color: var(--down-line); background: var(--card); box-shadow: 0 0 0 3px var(--down-soft); }
+  .field input::placeholder { color: var(--ink-3); font-weight: 400; }
+  .field > svg { position: absolute; left: 12px; top: 13px; width: 18px; height: 18px; color: var(--ink-3); pointer-events: none; }
+  .sugg { position: absolute; left: 0; right: 0; top: 50px; z-index: 10; background: var(--card); border: 1px solid var(--line); border-radius: 12px; box-shadow: 0 12px 40px rgba(0,0,0,.14); padding: 4px; max-height: 300px; overflow: auto; }
+  .sugg button { display: flex; align-items: center; gap: 10px; width: 100%; border: 0; background: none; padding: 8px 10px; border-radius: 8px; cursor: pointer; text-align: left; }
+  .sugg button:hover, .sugg button.on { background: var(--control); }
+  .sugg .rk { margin-left: auto; font-size: 12px; color: var(--ink-3); font-weight: 600; }
+  /* the picked trader's day: rank tile, who and stats, a PnL panel with today's line (the share image is drawn the same way) */
+  .you { margin-top: 14px; border-radius: 14px; padding: 14px; display: grid; grid-template-columns: auto minmax(0,1fr) minmax(0,300px) auto; gap: 16px; background: var(--control); }
+  .you .rank { min-width: 88px; padding: 0 12px; border-radius: 12px; background: var(--card); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; font-size: 34px; font-weight: 700; letter-spacing: -.03em; line-height: 1; }
+  .you .rank small { font-size: 11px; font-weight: 600; letter-spacing: .04em; color: var(--ink-2); white-space: nowrap; }
+  .you .rank[class*=" p"] small { color: inherit; opacity: .75; }
+  .you .info { display: flex; flex-direction: column; justify-content: center; gap: 10px; min-width: 0; }
+  .you .who { display: flex; align-items: center; gap: 10px; min-width: 0; }
+  .you .who b { font-size: 17px; font-weight: 700; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .you .stats { display: flex; flex-wrap: wrap; gap: 6px 24px; font-size: 12px; font-weight: 500; color: var(--ink-3); }
+  .you .stats b { display: block; font-size: 15px; font-weight: 600; color: var(--ink); }
+  .you .gap { font-size: 13px; font-weight: 500; color: var(--ink-2); }
+  .you .gap b { color: var(--ink); }
+  .you .pnl { border-radius: 12px; padding: 12px 14px 8px; background: var(--card); display: flex; flex-direction: column; align-items: flex-start; gap: 2px; min-width: 0; }
+  .you .pnl.gain { background: var(--pos-soft); }
+  .you .pnl.loss { background: var(--neg-soft); }
+  .you .pnl small { font-size: 12px; font-weight: 500; color: var(--ink-2); }
+  .you .pnl .v { position: relative; font-size: 28px; font-weight: 700; letter-spacing: -.02em; line-height: 1.15; }
+  .you .pnl svg.spark { width: 100%; height: 38px; display: block; margin-top: 2px; }
+  .you .acts { display: flex; flex-direction: column; justify-content: center; gap: 8px; }
+  .you .acts .btn:not(.pink) { background: var(--card); }
+  .miss { margin-top: 14px; border: 1px dashed var(--line); border-radius: 14px; padding: 18px; display: flex; gap: 16px; align-items: center; justify-content: space-between; flex-wrap: wrap; }
+  .miss b { font-size: 16px; font-weight: 600; }
+  .miss p { color: var(--ink-2); font-size: 13.5px; margin-top: 2px; max-width: 60ch; }
+
+  /* ---------- avatars ---------- */
+  .av { width: 32px; height: 32px; border-radius: 50%; flex: none; background: var(--control); display: grid; place-items: center; font-weight: 700; font-size: 13px; color: #fff; overflow: hidden; position: relative; }
+  .av img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+  .av.md { width: 40px; height: 40px; font-size: 16px; }
+  .ver { width: 14px; height: 14px; flex: none; color: var(--down-text); }
+
+  /* ---------- podium ---------- */
+  .sec-title { display: flex; align-items: baseline; gap: 10px; margin: 24px 4px 0; }
+  .sec-title h2 { font-size: 18px; font-weight: 700; letter-spacing: -.01em; }
+  .sec-title small { font-size: 13px; color: var(--ink-2); font-weight: 500; }
+  .podium { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 16px; margin-top: 10px; }
+  .pod-empty { grid-column: 1 / -1; padding: 20px; color: var(--ink-2); text-align: center; }
+  .pod { padding: 16px; display: flex; flex-direction: column; gap: 12px; cursor: pointer; position: relative; overflow: hidden; transition: transform .18s ease-out, border-color .15s; will-change: transform; }
+  .pod:hover { border-color: #cfd2d6; }
+  .pod .top { display: flex; align-items: center; gap: 10px; min-width: 0; }
+  .pod .place { width: 28px; height: 28px; border-radius: 8px; display: grid; place-items: center; font-weight: 700; font-size: 14px; flex: none; }
+  .pod.p1::after { content: ""; position: absolute; inset: 0; pointer-events: none; background: linear-gradient(105deg, transparent 42%, rgba(255,255,255,.5) 50%, transparent 58%); transform: translateX(-130%); animation: sheen 7s ease-in-out infinite; }
+  :root[data-theme="dark"] .pod.p1::after { background: linear-gradient(105deg, transparent 42%, rgba(255,255,255,.09) 50%, transparent 58%); }
+  @keyframes sheen { 0%, 72% { transform: translateX(-130%); } 100% { transform: translateX(130%); } }
+  /* gold, silver, bronze exactly as XO's referral tiers use them (base fill, ring, dark ink) */
+  .pod.p1 .place, .you .rank.p1 { background: #C7B583; color: #3A331F; box-shadow: inset 0 0 0 1.5px #867852; }
+  .pod.p2 .place, .you .rank.p2 { background: #B7BABE; color: #2C2E30; box-shadow: inset 0 0 0 1.5px #75787C; }
+  .pod.p3 .place, .you .rank.p3 { background: #B4967D; color: #3A2E22; box-shadow: inset 0 0 0 1.5px #6E5A49; }
+  .pod .name { font-weight: 600; font-size: 15px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; display: flex; align-items: center; gap: 4px; min-width: 0; }
+  .pod .name span { overflow: hidden; text-overflow: ellipsis; }
+  .pod .pnl { font-size: 28px; font-weight: 700; letter-spacing: -.02em; line-height: 1; }
+  .pod .sub { display: flex; gap: 14px; font-size: 12.5px; color: var(--ink-2); }
+  .pod .sub b { color: var(--ink); font-weight: 600; }
+  .pod svg.spark { width: 100%; height: 44px; display: block; }
+
+  /* ---------- board ---------- */
+  .board { margin-top: 16px; overflow: hidden; }
+  .board-head { display: flex; align-items: center; gap: 12px; padding: 14px 16px 0; flex-wrap: wrap; }
+  .board-head h2 { font-size: 18px; font-weight: 700; letter-spacing: -.01em; }
+  .upd { font-size: 12px; color: var(--ink-3); margin-left: auto; white-space: nowrap; }
+  .upd.late { color: var(--neg); font-weight: 600; }
+  .board-head small:empty { display: none; }
+  .board-head small { font-size: 13px; color: var(--ink-2); font-weight: 500; display: inline-flex; align-items: center; gap: 6px; }
+  .board-head .clear { width: 24px; height: 24px; border: 0; border-radius: 50%; background: var(--control); color: var(--ink-2); font-size: 10px; line-height: 1; cursor: pointer; display: grid; place-items: center; padding: 0; }
+  .board-head .clear:hover { background: var(--control-hover); color: var(--ink); }
+  .days { display: flex; gap: 8px; padding: 12px 16px 2px; overflow-x: auto; scrollbar-width: none; }
+  .days::-webkit-scrollbar { display: none; }
+  .day { flex: none; min-width: 138px; max-width: 170px; text-align: left; border: 1px solid var(--line); background: var(--card); border-radius: 12px; padding: 9px 12px 10px; cursor: pointer; display: flex; flex-direction: column; gap: 5px; }
+  .day:hover { background: var(--control); }
+  .day[aria-pressed="true"] { border-color: var(--ink); box-shadow: inset 0 0 0 1px var(--ink); }
+  .day .dt { font-size: 12px; font-weight: 600; color: var(--ink-2); display: flex; justify-content: space-between; gap: 8px; }
+  .day .dt em { font-style: normal; font-weight: 600; color: var(--up-text); }
+  .day .dw { display: flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 600; min-width: 0; }
+  .day .dw > span:last-child { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .day b { font-size: 15px; font-weight: 700; }
+  .av.sm { width: 20px; height: 20px; font-size: 10px; }
+  .tabs { display: flex; gap: 4px; padding: 12px 16px; overflow-x: auto; scrollbar-width: none; border-bottom: 1px solid var(--line); }
+  .tabs::-webkit-scrollbar { display: none; }
+  .tab { height: 32px; padding: 0 12px; border-radius: 9px; border: 0; background: none; font-weight: 600; font-size: 13px; color: var(--ink-2); cursor: pointer; white-space: nowrap; }
+  .tab:hover:not([aria-selected="true"]) { background: var(--control); }
+  .tab[aria-selected="true"] { color: var(--card); } /* the dark highlight behind it is .pill */
+  .hint { padding: 8px 16px; font-size: 12.5px; color: var(--ink-2); border-bottom: 1px solid var(--line-soft); background: var(--control); }
+  .tscroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  .mlist { display: none; }
+  .mrow { padding: 12px; border-bottom: 1px solid var(--line-soft); cursor: pointer; }
+  .mrow:last-child { border-bottom: 0; }
+  .mrow.me { background: linear-gradient(90deg, var(--up-soft), var(--down-soft)); }
+  .mtop { display: flex; align-items: center; gap: 10px; }
+  .mtop .rk { min-width: 30px; }
+  .mtop .nm { flex: 1; min-width: 0; display: flex; align-items: center; gap: 4px; font-weight: 600; font-size: 15px; }
+  .mtop .nm > span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .mtop .mmain { font-size: 16px; font-weight: 700; white-space: nowrap; }
+  .mstats { display: flex; justify-content: space-between; gap: 6px; margin-top: 10px; padding: 8px 10px; border-radius: 10px; background: var(--control); font-size: 12px; font-weight: 600; white-space: nowrap; }
+  .mrow.me .mstats { background: var(--card); }
+  .mstats i { font-style: normal; font-weight: 500; color: var(--ink-3); margin-right: 4px; }
+  table { width: 100%; border-collapse: collapse; }
+  th { font-size: 12px; font-weight: 500; color: var(--ink-3); text-align: right; padding: 10px 12px; white-space: nowrap; border-bottom: 1px solid var(--line-soft); }
+  th:nth-child(1), th:nth-child(2) { text-align: left; }
+  td { padding: 10px 12px; text-align: right; border-bottom: 1px solid var(--line-soft); white-space: nowrap; }
+  tr:last-child td { border-bottom: 0; }
+  td:first-child, th:first-child { padding-left: 16px; width: 76px; }
+  td:last-child, th:last-child { padding-right: 16px; }
+  tbody tr { cursor: pointer; }
+  tbody tr.off, .mrow.off { cursor: default; }
+  tbody tr.off:hover { background: none; }
+  tbody tr:hover { background: var(--control); }
+  tbody tr.me { background: linear-gradient(90deg, var(--up-soft), var(--down-soft)); }
+  .rk { display: flex; align-items: center; gap: 8px; font-weight: 700; }
+  .rk .n { min-width: 22px; }
+  .trader { display: flex; align-items: center; gap: 10px; text-align: left; min-width: 0; }
+  .trader .nm { font-weight: 600; overflow: hidden; text-overflow: ellipsis; max-width: 220px; }
+  td.main { font-weight: 700; font-size: 15px; }
+  .wr { display: inline-flex; align-items: center; gap: 8px; }
+  .wr i { width: 44px; height: 5px; border-radius: 9px; background: var(--down-soft); overflow: hidden; display: block; }
+  .wr i u { display: block; height: 100%; background: var(--down); border-radius: 9px; }
+  .more { display: flex; justify-content: center; padding: 14px; border-top: 1px solid var(--line-soft); }
+  .pickday { padding: 14px 16px 16px; font-size: 13px; color: var(--ink-3); }
+  .empty { padding: 48px 16px; text-align: center; color: var(--ink-2); }
+  .empty b { display: block; color: var(--ink); font-size: 16px; margin-bottom: 4px; }
+
+  /* ---------- how it's counted ---------- */
+  .how { margin-top: 16px; padding: 20px 24px; }
+  .how h2 { font-size: 15px; font-weight: 600; margin-bottom: 8px; }
+  .how ul { margin: 0; padding-left: 18px; color: var(--ink-2); display: grid; gap: 4px; font-size: 13.5px; }
+  main.wrap { padding-bottom: 16px; } /* same as the gap between cards; .wrap's own padding would win over a bare `main` */
+
+  /* share modal */
+  dialog { border: 1px solid var(--line); border-radius: 18px; padding: 16px; background: var(--card); color: var(--ink); width: min(680px, calc(100vw - 24px)); box-shadow: 0 16px 48px rgba(0,0,0,.3); }
+  dialog::backdrop { background: rgba(0,0,0,.5); }
+  dialog canvas { width: 100%; height: auto; border-radius: 12px; border: 1px solid var(--line); display: block; }
+  dialog .acts { display: flex; gap: 10px; margin-top: 14px; }
+  dialog #s-close { margin-left: auto; }
+  dialog .seg { margin-bottom: 12px; }
+  dialog .note { font-size: 13px; font-weight: 500; color: var(--ink-2); margin-top: 12px; }
+
+  /* ---------- motion: the page moves with the rounds ---------- */
+  :root { --beat: 1.8s; }
+  /* heartbeat: the logo line redraws on every beat, faster as a round runs out */
+  .brand svg { animation: thump var(--beat) ease-in-out infinite; }
+  .brand svg path.ecg { stroke-dasharray: 100; animation: ecg var(--beat) linear infinite; } /* drawn over a faint copy, so the logo is never blank */
+  @keyframes thump { 0%, 24%, 100% { transform: scale(1); } 10% { transform: scale(1.09); } }
+  @keyframes ecg { 0% { stroke-dashoffset: 100; } 42%, 100% { stroke-dashoffset: 0; } }
+  /* the last 30 seconds of a round */
+  .live.urgent #l-clock { color: var(--neg); animation: tick 1s ease-in-out infinite; transform-origin: right center; }
+  @keyframes tick { 0%, 100% { transform: scale(1); } 12% { transform: scale(1.07); } }
+  /* the round is over and its winner isn't published yet */
+  .live.settling #l-clock { color: var(--ink-3); }
+  .live.settling .meter i { animation: blink 1s ease-in-out infinite; }
+  .live.settling .live-dot { color: var(--ink-2); }
+  /* a round just settled: the result sweeps over the card, a soft band runs down the page */
+  .result { position: absolute; inset: 0; z-index: 3; display: none; flex-direction: column; align-items: center; justify-content: center; gap: 2px; text-align: center; pointer-events: none; }
+  .result.u { background: var(--up); color: var(--up-ink); } .result.d { background: var(--down); color: var(--down-ink); }
+  .result small { font-size: 13px; font-weight: 600; opacity: .75; }
+  .result b { font-size: 38px; font-weight: 700; letter-spacing: -.02em; line-height: 1.15; }
+  .result span { font-size: 16px; font-weight: 600; }
+  .result.show { display: flex; animation: wipe 3s cubic-bezier(.7,0,.2,1) both; }
+  .result.show > * { animation: rise .5s .3s both; }
+  @keyframes wipe { 0% { clip-path: inset(0 100% 0 0); } 15%, 84% { clip-path: inset(0 0 0 0); } 100% { clip-path: inset(0 0 0 100%); } }
+  @keyframes rise { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
+  #wave { position: fixed; left: 0; right: 0; top: 0; height: 70vh; z-index: 15; pointer-events: none; opacity: 0; }
+  #wave.u { background: linear-gradient(180deg, transparent, rgba(255,135,166,.20) 60%, transparent); }
+  #wave.d { background: linear-gradient(180deg, transparent, rgba(162,147,255,.22) 60%, transparent); }
+  #wave.go { animation: wave 1.4s ease-out; }
+  @keyframes wave { 0% { opacity: 1; transform: translateY(-70vh); } 100% { opacity: 0; transform: translateY(100vh); } }
+  .past .r.pending em { color: var(--ink-3); animation: blink 1s ease-in-out infinite; }
+  .past .r.pop { animation: pop .55s cubic-bezier(.2,1.5,.4,1); }
+  @keyframes pop { from { transform: scale(.6); opacity: 0; } to { transform: none; opacity: 1; } }
+  /* a number changed: the row (or tile) flashes and the difference floats up beside it */
+  tr.flash-up td, .mrow.flash-up, .pod.flash-up, .total.flash-up { animation: flashUp 1.6s ease-out; }
+  tr.flash-down td, .mrow.flash-down, .pod.flash-down, .total.flash-down { animation: flashDown 1.6s ease-out; }
+  @keyframes flashUp { 0% { box-shadow: inset 0 0 0 999px var(--pos-soft); } 100% { box-shadow: inset 0 0 0 999px transparent; } }
+  @keyframes flashDown { 0% { box-shadow: inset 0 0 0 999px var(--neg-soft); } 100% { box-shadow: inset 0 0 0 999px transparent; } }
+  .mainv { position: relative; display: inline-block; }
+  .delta { position: absolute; right: 0; bottom: 100%; font-style: normal; font-size: 11px; font-weight: 700; white-space: nowrap; pointer-events: none; animation: floatUp 2.4s ease-out forwards; }
+  @keyframes floatUp { 0% { opacity: 0; transform: translateY(8px); } 15%, 70% { opacity: 1; transform: none; } 100% { opacity: 0; transform: translateY(-10px); } }
+
+  /* ---------- polish: nothing appears or changes in a jump ---------- */
+  /* the page arrives: cards rise one after another; until the data is in, placeholders shimmer where numbers will be */
+  .hero > *, main > .race, main > .find, main > .sec-title, main > .podium, main > .board, main > .how { animation: enter .55s cubic-bezier(.2,.8,.2,1) both; }
+  .hero > :nth-child(2) { animation-delay: .07s; }
+  main > .race { animation-delay: .14s; } main > .find { animation-delay: .2s; } main > .sec-title { animation-delay: .24s; }
+  main > .podium { animation-delay: .27s; } main > .board { animation-delay: .32s; } main > .how { animation-delay: .38s; }
+  @keyframes enter { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+  .sk, .sk-card, .sk-row, .race-box.sk-box { background: linear-gradient(90deg, var(--control) 25%, var(--control-hover) 50%, var(--control) 75%); background-size: 200% 100%; animation: shimmer 1.3s linear infinite; }
+  .sk { display: inline-block; min-width: 56px; border-radius: 6px; color: transparent !important; }
+  .sk-card { height: 150px; border-radius: 16px; }
+  .sk-row { height: 44px; margin: 10px 16px; border-radius: 10px; }
+  .race-box.sk-box { border-radius: 12px; }
+  @keyframes shimmer { from { background-position: 200% 0; } to { background-position: -200% 0; } }
+  /* the highlight of the active tab or switch slides to its new place */
+  .tabs, .seg { position: relative; }
+  .tab, .seg button { position: relative; z-index: 1; transition: color .2s; }
+  .pill { position: absolute; left: 0; top: 0; z-index: 0; pointer-events: none; border-radius: 9px; background: var(--ink); transition: transform .3s cubic-bezier(.3,.8,.2,1), width .3s cubic-bezier(.3,.8,.2,1); }
+  .seg .pill { border-radius: 8px; background: var(--card); box-shadow: 0 1px 2px rgba(16,17,20,.12); }
+  /* light and dark cross-fade (only used where the browser can't snapshot the page) */
+  .theming, .theming * { transition: background-color .3s ease, color .3s ease, border-color .3s ease !important; }
+
+  @media (max-width: 860px) {
+    .hero { grid-template-columns: 1fr; }
+    .total { padding: 12px; }
+    .total b { font-size: 17px; }
+    .podium { grid-template-columns: 1fr; gap: 10px; }
+    .pod { flex-direction: row; align-items: center; flex-wrap: wrap; }
+    .pod .top { flex: 1; }
+    .pod .pnl { font-size: 20px; }
+    .pod .sub, .pod svg.spark { display: none; }
+    /* phones: the table becomes a list of cards, so every number is visible without scrolling sideways */
+    .tscroll { display: none; }
+    .mlist { display: block; }
+    .field input { font-size: 16px; } /* under 16px iOS zooms the page when the field is focused */
+    /* leaderboard header: title and "Updated" on the first line, the picked day on its own line below */
+    .board-head { gap: 4px 12px; }
+    .board-head .upd { order: 2; }
+    .board-head #board-period { order: 3; flex-basis: 100%; }
+    /* the three chips above the headline stay on one line */
+    .eyebrow { flex-wrap: nowrap; gap: 5px; }
+    .chip { padding: 0 8px; font-size: 11.5px; }
+    .chip .long { display: none; }
+    /* race controls on one line */
+    .race-ctl { flex-wrap: nowrap; gap: 6px; width: 100%; }
+    .seg button { padding: 0 8px; }
+    #race-n button + button .pre { display: none; }
+    .race-ctl .btn { padding: 0 12px; margin-left: auto; }
+    /* the picked trader's card: rank and name on the first line, everything else full width below */
+    .you { grid-template-columns: auto minmax(0,1fr); gap: 12px; align-items: center; }
+    .you .info { display: contents; }
+    .you .rank { min-width: 76px; padding: 10px 12px; font-size: 28px; }
+    .you .stats, .you .gap, .you .pnl, .you .acts { grid-column: 1 / -1; }
+    .you .stats { justify-content: space-between; gap: 6px 12px; }
+    .you .acts { flex-direction: row; }
+    .you .acts > * { flex: 1; }
+    /* share buttons: the post button across the top, Download and Close side by side under it */
+    dialog .acts { display: grid; grid-template-columns: 1fr 1fr; }
+    dialog .acts .btn { height: 44px; font-size: 14px; }
+    dialog #s-x { grid-column: 1 / -1; }
+    dialog #s-close { margin-left: 0; }
+    .find-row { flex-wrap: wrap; }
+    .find label { width: 100%; }
+    main.wrap { padding-bottom: calc(16px + env(safe-area-inset-bottom)); }
+    .race-box { height: 380px; }
+    .facts { grid-template-columns: 1fr 1fr; }
+    .fact:nth-child(3) { grid-column: 1 / -1; border-left: 0; border-top: 1px solid var(--line); }
+  }
+  @media (max-width: 380px) { #race-tx { display: none; } }
+  @media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
+  /* the right-hand card: today's biggest single wins */
+  .wins { padding: 22px 24px; display: flex; flex-direction: column; gap: 12px; }
+  .wins-head { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; }
+  .wins-head b { font-size: 16px; font-weight: 600; }
+  .wins-head small { color: var(--ink-3); font-size: 12px; }
+  .wins-list { display: flex; flex-direction: column; gap: 6px; }
+  .win { display: grid; grid-template-columns: 40px minmax(0,1fr) auto; gap: 10px; align-items: center; padding: 8px; border-radius: 12px; color: inherit; text-decoration: none; transition: background .15s; }
+  .win:hover { background: var(--control); }
+  .win .pic { width: 40px; height: 40px; border-radius: 10px; object-fit: cover; background: var(--control); }
+  .win .t { font-size: 13px; font-weight: 600; line-height: 1.25; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+  .win .by { display: flex; align-items: center; gap: 5px; font-size: 12px; color: var(--ink-2); margin-top: 2px; min-width: 0; }
+  .win .by span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .win .p { font-weight: 700; font-size: 15px; }
+  .wins-empty { color: var(--ink-3); font-size: 13px; padding: 18px 4px; }
+</style>
+<script>
+  // Vercel Web Analytics: page views only, no cookies. Skipped on localhost, where /_vercel/insights doesn't exist.
+  if (!/^(localhost|127\.0\.0\.1)$/.test(location.hostname)) {
+    window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };
+    const s = document.createElement("script"); s.defer = true; s.src = "/_vercel/insights/script.js"; document.head.appendChild(s);
+  }
+</script>
+</head>
+<body>
+
+<header class="bar">
+  <div class="wrap">
+    <a class="brand" href="./" aria-label="Maco Board home">
+      <svg viewBox="0 0 64 64" aria-hidden="true"><rect width="64" height="64" rx="16" fill="#a293ff"/><path d="M17 44V32M27 44V22M37 44V27M47 44V16" fill="none" stroke="#fff" stroke-width="6" stroke-linecap="round"/></svg>
+      <span class="bt">Maco Board</span>
+    </a>
+    <span class="sp"></span>
+    <!-- two boards, one page: XO's markets and its convictions -->
+    <div class="seg views" id="views" role="group" aria-label="Board">
+      <button data-board="m" aria-pressed="true">Markets</button><button data-board="c" aria-pressed="false">Convictions</button>
+    </div>
+    <button class="icon-btn" id="theme" aria-label="Switch light / dark theme">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5Z"/></svg>
+    </button>
+  </div>
+</header>
+
+<main class="wrap">
+  <section class="hero">
+    <div class="card intro v-today">
+      <div class="eyebrow">
+        <span class="chip" id="b-chip">XO Markets</span>
+      </div>
+      <h1 id="b-title">Who's <em>up</em> on markets?</h1>
+      <p class="lede" id="b-lede"></p>
+      <div class="today">
+        <div class="today-head"><b>Today so far</b><small id="totals-note"></small></div>
+        <div class="totals" aria-label="Today's totals">
+          <div class="total"><small>Traders</small><b class="num sk" id="t-traders">–</b></div>
+          <div class="total"><small>Settled</small><b class="num sk" id="t-rounds">–</b></div>
+          <div class="total"><small>Staked</small><b class="num sk" id="t-volume">–</b></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card wins">
+      <div class="wins-head"><b>Biggest wins today</b><small id="wins-note"></small></div>
+      <div class="wins-list" id="wins-list"><div class="sk-row"></div><div class="sk-row"></div><div class="sk-row"></div></div>
+    </div>
+  </section>
+
+  <section class="card race" id="race">
+    <div class="race-head">
+      <div>
+        <h2 id="race-title">Today's race</h2>
+        <p id="race-sub">Profit the leaders locked in today, sale by sale and payout by payout. Drag across the chart to rewind.</p>
+      </div>
+      <div class="race-ctl">
+        <div class="seg" id="race-n" role="group" aria-label="Traders shown">
+          <button data-n="5" aria-pressed="false"><span class="pre">Top </span>5</button><button data-n="10" aria-pressed="true"><span class="pre">Top </span>10</button><button data-n="20" aria-pressed="false"><span class="pre">Top </span>20</button>
+        </div>
+        <div class="seg" id="race-scale" role="group" aria-label="Scale">
+          <button data-log="1" aria-pressed="true">Log</button><button data-log="0" aria-pressed="false">Linear</button>
+        </div>
+        <button class="btn" id="race-play" aria-label="Replay the race"><span id="race-ic" aria-hidden="true">▶</span><span id="race-tx">Replay</span></button>
+      </div>
+    </div>
+    <div class="race-box sk-box"><canvas id="race-cv" role="img" aria-label="Line chart of the leaders' cumulative PnL through today"></canvas></div>
+    <div class="race-legend"><span><i class="dash"></i>$0 line</span>
+      <span class="v-comp tagkey" hidden><b class="tk ok">In the prizes</b></span>
+      <span class="v-comp tagkey" hidden><b class="tk near">Behind 10th</b></span>
+      <span class="v-comp tagkey" hidden><b class="tk need">More volume to qualify</b></span>
+      <span class="v-comp tagkey" hidden><b class="tk out">Not ranked on XO yet</b></span></div>
+  </section>
+
+  <section class="card find v-today" id="find">
+    <div class="find-row">
+      <label for="q">Find yourself</label>
+      <div class="field">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+        <input id="q" type="search" placeholder="Your XO username" autocomplete="off" autocapitalize="off" spellcheck="false" enterkeyhint="search" role="combobox" aria-expanded="false" aria-controls="sugg">
+        <div class="sugg" id="sugg" role="listbox" hidden></div>
+      </div>
+    </div>
+    <div id="you"></div>
+  </section>
+
+  <div class="sec-title v-today"><h2>Today's top 3</h2><small id="podium-note"></small></div>
+  <section class="podium v-today" id="podium" aria-label="Top three"><div class="sk-card"></div><div class="sk-card"></div><div class="sk-card"></div></section>
+
+  <section class="card board v-today">
+    <div class="board-head">
+      <h2>Leaderboard</h2>
+      <small id="board-period"></small>
+      <span class="upd" id="upd"></span>
+    </div>
+    <div class="days" id="days" role="group" aria-label="Period" hidden></div>
+    <div class="tabs" role="tablist" id="tabs"></div>
+    <div class="hint" id="hint" hidden></div>
+    <div id="table"><div class="sk-row"></div><div class="sk-row"></div><div class="sk-row"></div><div class="sk-row"></div><div class="sk-row"></div></div>
+  </section>
+
+
+  <section class="card how v-today">
+    <h2>How this is counted</h2>
+    <ul>
+      <li>Profit counts on the day it is locked in, the way XO's Net PnL does: when shares are sold, or when a resolved market pays out. Open positions don't count until then.</li>
+      <li>Each sale or payout is worth its shares × (price − your average entry price), from your public XO activity, the same figure the app shows. Fees are left out.</li>
+      <li>Markets and convictions are two separate boards; Pulse rounds have <a href="https://xo-pulse-board.vercel.app" target="_blank" rel="noopener">their own</a>.</li>
+      <li id="how-day">A day on this board runs from 00:00 to 24:00 UTC; today's numbers keep updating until it ends.</li>
+      <li id="how-window">Everything on this page is today's, unless you pick another day in the leaderboard.</li>
+      <li>Private profiles aren't ranked. Make your profile public in XO settings to appear.</li>
+      <li>The Win rate tab needs at least 3 markets settled that day.</li>
+    </ul>
+  </section>
+</main>
+
+<div id="wave" aria-hidden="true"></div>
+
+<dialog id="share">
+  <div class="seg" id="s-mode" role="group" aria-label="What to share"><button data-mode="image" aria-pressed="true">Image</button><button data-mode="video" aria-pressed="false">Video</button></div>
+  <canvas id="cv" width="1200" height="675"></canvas>
+  <p class="note" id="s-note" hidden></p>
+  <div class="acts">
+    <button class="btn pink" id="s-x" autofocus>Post on X</button>
+    <button class="btn" id="s-dl">Download</button>
+    <button class="btn" id="s-close">Close</button>
+  </div>
+</dialog>
+
+<script>
+// ---------- config ----------
+const REF = "https://beta.xo.market/?r=andriy_shkinder"; // every trade link opens XO, with the referral code
+const XO_API = "https://api-mainnet.xo.market/api";
+// the one data file. The indexer publishes it to the repo's `data` branch; the copy next to the page is the fallback
+const DATA_RAW = "https://raw.githubusercontent.com/AndriyShk/maco-board/data/days.json", DATA_LOCAL = "data/days.json";
+const PAGE = 50;
+const MIN_DECIDED = 3; // markets settled in a day needed for the win-rate tab
+const ROUND = 5 * 6e4;
+
+const $ = (id) => document.getElementById(id);
+const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+document.querySelectorAll("a.ref").forEach((a) => (a.href = REF));
+
+// ---------- theme ----------
+const root = document.documentElement;
+const setTheme = (t) => { root.dataset.theme = t; document.querySelector('meta[name="theme-color"]').content = t === "dark" ? "#121213" : "#f5f5f5"; };
+let saved = null;
+try { saved = localStorage.getItem("theme"); } catch {}
+setTheme(saved || (matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light"));
+$("theme").onclick = () => {
+  const t = root.dataset.theme === "dark" ? "light" : "dark";
+  const swap = () => { setTheme(t); try { localStorage.setItem("theme", t); } catch {} render(); drawRace(); };
+  // the browser cross-fades a snapshot of the whole page (chart included) where it can; elsewhere the colours ease over
+  if (document.startViewTransition && !noMotion() && !document.hidden) {
+    const vt = document.startViewTransition(swap);
+    for (const part of [vt.ready, vt.finished, vt.updateCallbackDone]) part.catch(() => {}); // an aborted fade still switched the theme
+    return;
+  }
+  root.classList.add("theming");
+  swap();
+  setTimeout(() => root.classList.remove("theming"), 350);
+};
+
+// ---------- formatting ----------
+const money = (x, sign = true) => {
+  const a = Math.abs(x);
+  const s = a >= 1e6 ? (a / 1e6).toFixed(2) + "M" : a >= 1e4 ? (a / 1e3).toFixed(1) + "k" : a >= 100 ? a.toLocaleString("en-US", { maximumFractionDigits: 0 }) : a.toFixed(2);
+  return (x < -0.004 ? "−" : sign && x > 0.004 ? "+" : "") + "$" + s;
+};
+const cls = (x) => (x > 0.004 ? "pos" : x < -0.004 ? "neg" : "muted");
+const ago = (t) => { const m = Math.max(0, Math.round((Date.now() - t) / 6e4)); return m < 1 ? "just now" : m < 60 ? `${m} min ago` : m < 1440 ? `${Math.round(m / 60)} h ago` : `${Math.round(m / 1440)} d ago`; };
+// "Updated N min ago". Old data makes the page ask for a refresh, and for the two minutes that should take it says
+// "refreshing…"; only data that stays old after that (the refresh failed) turns red and says "delayed".
+let staleSince = 0; // when this page first found the current data old
+const showUpdated = () => {
+  const t = days.updatedAt, wait = staleSince && Date.now() - staleSince < 2 * 6e4, late = !wait && Date.now() - t > 20 * 6e4;
+  $("upd").textContent = `Updated ${ago(t)}${wait ? " · refreshing…" : late ? " · delayed" : ""}`;
+  $("upd").classList.toggle("late", late);
+};
+const day = (t) => new Date(t).toLocaleDateString("en-US", { month: "short", day: "numeric" });
+const dayUTC = (t) => new Date(t).toLocaleDateString("en-US", { month: "short", day: "numeric", timeZone: "UTC" });
+const hm = (t) => new Date(t).toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" });
+const plural = (n) => (n === 1 ? "market" : "markets");
+const winRate = (r) => (r.wins + r.losses ? r.wins / (r.wins + r.losses) : 0);
+const wrText = (r) => (r.wins + r.losses ? `${(winRate(r) * 100).toFixed(0)}%` : "–"); // no decided round yet: no rate
+
+const avatarUrl = (a, size = "bigger") => (!a ? "" : (a.startsWith("http") ? a : "https://pbs.twimg.com/profile_images/" + a).replace("_normal.", `_${size}.`));
+const avatar = (r, k = "") => `<span class="av ${k}" style="background:${/^#[0-9a-f]{6}$/i.test(r.c) ? r.c : "#a293ff"}">${esc((r.u[0] || "?").toUpperCase())}${r.a ? `<img src="${esc(avatarUrl(r.a))}" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.remove()">` : ""}</span>`;
+const VER = '<svg class="ver" viewBox="0 0 24 24" aria-label="Verified"><path fill="currentColor" d="M12 2l2.4 2.1 3.2-.3.9 3.1 2.7 1.7-1.2 3 1.2 3-2.7 1.7-.9 3.1-3.2-.3L12 22l-2.4-2.1-3.2.3-.9-3.1-2.7-1.7 1.2-3-1.2-3 2.7-1.7.9-3.1 3.2.3z"/><path d="m8.5 12.2 2.4 2.4 4.6-4.9" fill="none" stroke="var(--card)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+
+function spark(points, w, h) {
+  const min = Math.min(0, ...points), max = Math.max(0, ...points), span = max - min || 1;
+  const x = (i) => (i / (points.length - 1)) * (w - 2) + 1, y = (v) => h - 2 - ((v - min) / span) * (h - 4);
+  const d = points.map((v, i) => `${i ? "L" : "M"}${x(i).toFixed(1)} ${y(v).toFixed(1)}`).join("");
+  const c = points[points.length - 1] >= 0 ? "var(--pos)" : "var(--neg)";
+  return `<svg class="spark" viewBox="0 0 ${w} ${h}" preserveAspectRatio="none" aria-hidden="true"><path d="M1 ${y(0).toFixed(1)}H${w - 1}" stroke="var(--line)" stroke-dasharray="2 3"/><path d="${d}" fill="none" stroke="${c}" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round" vector-effect="non-scaling-stroke"/></svg>`;
+}
+
+// ---------- motion ----------
+// Numbers roll from the old value to the new one; whatever holds them flashes green or red; rows glide to their new places.
+const lessMotion = matchMedia("(prefers-reduced-motion: reduce)");
+const noMotion = () => lessMotion.matches;
+const fmt = {
+  money: (v) => money(v), usd: (v) => money(v, false), int: (v) => Math.round(v).toLocaleString("en-US"),
+  pct1: (v) => v.toFixed(1) + "%", wins: (v) => Math.round(v) + " wins",
+  price: (v) => "$" + v.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }),
+  cents: (v) => (v * 100).toFixed(1).replace(/\.0$/, "") + "¢",
+};
+const numStore = new Map(); // key -> last value shown, so a re-render knows what changed
+function tweenNum(el, from, to, f, ms = 650) {
+  // write into the element's own text node, so a difference floating beside the number isn't wiped
+  const text = el.firstChild && el.firstChild.nodeType === 3 ? el.firstChild : el.insertBefore(document.createTextNode(""), el.firstChild);
+  const paint = (v) => { text.nodeValue = fmt[f](v); if (f === "money") { el.classList.remove("pos", "neg", "muted"); el.classList.add(cls(v)); } };
+  if (noMotion() || document.hidden) return paint(to);
+  const t0 = performance.now(), my = (el._tw = (el._tw || 0) + 1);
+  const step = (now) => {
+    if (el._tw !== my) return; // a newer change took over
+    const p = Math.min(1, (now - t0) / ms);
+    paint(p < 1 ? from + (to - from) * (1 - Math.pow(1 - p, 3)) : to);
+    if (p < 1 && el.isConnected) requestAnimationFrame(step);
+  };
+  requestAnimationFrame(step);
+}
+function flash(host, up) {
+  if (!host || noMotion()) return;
+  host.classList.remove("flash-up", "flash-down");
+  void host.offsetWidth; // restart the animation
+  host.classList.add(up ? "flash-up" : "flash-down");
+}
+// a fixed element (totals, price): show v, rolling from the previous value; `intro` counts up from zero the first time
+function setNum(el, key, v, f, intro) {
+  const prev = numStore.get(key);
+  numStore.set(key, v);
+  if (prev == null) return intro ? tweenNum(el, 0, v, f, 900) : (el.textContent = fmt[f](v));
+  if (Math.abs(prev - v) < 1e-9) return (el.textContent = fmt[f](v));
+  tweenNum(el, prev, v, f);
+  flash(el.closest(".total"), v > prev);
+}
+// freshly rendered markup: every [data-k] element rolls from the value it had in the previous render
+function animateNums(scope) {
+  for (const el of scope.querySelectorAll("[data-k]")) {
+    const k = el.dataset.k, v = Number(el.dataset.v), prev = numStore.get(k);
+    numStore.set(k, v);
+    if (prev == null) { if (el.dataset.intro) tweenNum(el, 0, v, el.dataset.f, 900); continue; }
+    if (Math.abs(prev - v) < 1e-9) continue;
+    tweenNum(el, prev, v, el.dataset.f);
+    flash(el.closest("tr, .mrow, .pod"), v > prev);
+    if (el.dataset.delta && !noMotion() && Math.abs(v - prev) > 0.004) {
+      const d = document.createElement("i");
+      d.className = "delta " + cls(v - prev);
+      d.textContent = money(v - prev);
+      el.appendChild(d);
+      setTimeout(() => d.remove(), 2500);
+    }
+  }
+}
+// el.animate(), with a guarantee: shortly after it should have ended it is finished by hand. If the browser isn't ticking
+// animations (a throttled or background page), nothing is left invisible or half-moved.
+function play(el, frames, opt) {
+  const a = el.animate(frames, opt);
+  setTimeout(() => { try { a.finish(); } catch {} }, (opt.duration || 0) + (opt.delay || 0) + 80);
+  return a;
+}
+// the highlight behind the active tab / switch: one element that slides to whichever button is active
+function movePill(box, sel) {
+  const on = box.querySelector(sel);
+  let pill = box.querySelector(":scope > .pill");
+  if (!on || !on.offsetWidth) return;
+  const fresh = !pill;
+  if (fresh) { pill = document.createElement("i"); pill.className = "pill"; pill.setAttribute("aria-hidden", "true"); box.prepend(pill); }
+  if (fresh || noMotion()) pill.style.transition = "none"; // placed, not animated, the first time
+  pill.style.width = `${on.offsetWidth}px`;
+  pill.style.height = `${on.offsetHeight}px`;
+  pill.style.transform = `translate(${on.offsetLeft}px, ${on.offsetTop}px)`;
+  if (fresh) requestAnimationFrame(() => requestAnimationFrame(() => (pill.style.transition = "")));
+}
+// where each row was before a re-render, so it can glide to where it is after (same day and tab), or fade in (new view)
+let lastView = "";
+const rowTops = () => new Map([...$("table").querySelectorAll("[data-u]")].filter((el) => el.offsetParent).map((el) => [el.dataset.u, el.getBoundingClientRect().top]));
+let slide = null; // set by a click in the day strip: -1 / 0 / 1 = which side the new ranking comes in from
+function moveRows(before, view) {
+  const same = view === lastView;
+  lastView = view;
+  if (noMotion() || document.hidden) { slide = null; return; }
+  if (slide != null) { // a day change: the whole ranking arrives as one piece
+    play($("table"), [{ opacity: 0, transform: `translateX(${slide * 28}px)` }, { opacity: 1, transform: "none" }], { duration: 260, easing: "cubic-bezier(.2,.8,.2,1)" });
+    slide = null;
+    return;
+  }
+  [...$("table").querySelectorAll("[data-u]")].filter((el) => el.offsetParent).forEach((el, i) => {
+    const was = before.get(el.dataset.u), now = el.getBoundingClientRect().top;
+    if (same && was != null && Math.abs(was - now) > 1) {
+      play(el, [{ transform: `translateY(${was - now}px)` }, { transform: "none" }], { duration: 650, easing: "cubic-bezier(.2,.8,.2,1)" });
+      if (was > now) flash(el, true); // climbed
+    } else if (!same || was == null) {
+      play(el, [{ opacity: 0, transform: "translateY(8px)" }, { opacity: 1, transform: "none" }], { duration: 320, delay: Math.min(i, 14) * 22, easing: "ease-out", fill: "backwards" });
+    }
+  });
+}
+
+// ---------- state ----------
+let days = null; // the data file: today's ranking and lines, the past days, the event settings
+let rows = [], byName = new Map(), me = null; // today's ranking, the same by lowercase username, the picked trader
+let tab = "pnl", shown = PAGE, period = null, periodSet = false; // period: the day open in the leaderboard ("YYYY-MM-DD", UTC), or null
+
+// one day's ranking as objects; only today's rows carry a PnL line (`spark`)
+const dayCache = new Map();
+function dayRows(k) {
+  if (dayCache.has(k)) return dayCache.get(k);
+  const d = days.days.find((x) => x.d === k);
+  const out = (d ? d.rows : []).map(([u, pnl, vol, rounds, wins, losses, best, bestId], i) => {
+    const [a, v, c] = days.users[u] || ["", 0, ""];
+    return { u, a, v, c, pnl, vol, rounds, wins, losses, bestStreak: 0, best, bestId, spark: k === days.today ? days.todaySpark[u] || [0, 0] : null, rank: i + 1 };
+  });
+  dayCache.set(k, out);
+  return out;
+}
+// when a board day starts on the visitor's clock (the day itself runs 00:00-24:00 UTC), e.g. "3:00 AM"
+const dayStartLocal = () => hm(Date.parse(days.today + "T00:00:00Z"));
+const dayTitle = (k) => (k === days.today ? "Today" : new Date(k + "T12:00:00Z").toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric", timeZone: "UTC" }));
+
+// num: the value a tab ranks by (highest first, unless `asc`); f: how it is written; keep: who qualifies
+const TABS = [
+  { id: "pnl", label: "Top PnL", head: "PnL", num: (r) => r.pnl, f: "money" },
+  { id: "win", label: "Win rate", head: "Win rate", num: (r) => winRate(r) * 100, f: "pct1", keep: (r) => r.wins + r.losses >= MIN_DECIDED, hint: `Share of settled markets that made money. Needs at least ${MIN_DECIDED} that day.` },
+  { id: "best", label: "Biggest win", head: "Best market", num: (r) => r.best, f: "money", keep: (r) => r.best > 0, hint: "The most profit locked in on a single market that day." },
+  { id: "vol", label: "Staked", head: "Staked", num: (r) => r.vol, f: "usd", hint: "What the settled shares cost: the money that was on the line." },
+  { id: "rekt", label: "Rekt", head: "PnL", num: (r) => r.pnl, asc: true, f: "money", keep: (r) => r.pnl < -0.004, hint: "The other end of the board. Respect for showing up." },
+];
+const sorted = (t) => dayRows(period).filter(t.keep || (() => true)).sort((a, b) => (t.asc ? -1 : 1) * (t.num(b) - t.num(a)) || b.vol - a.vol);
+
+// ---------- render ----------
+function render() {
+  if (!days) return;
+  const B = BOARDS[board];
+  $("b-chip").textContent = B.chip;
+  $("b-title").innerHTML = `Who's <em>up</em> on ${B.noun}?`;
+  $("b-lede").textContent = B.lede;
+  $("how-day").textContent = `A day on this board runs from ${dayStartLocal()} to ${dayStartLocal()} your time (00:00 to 24:00 UTC); today's numbers keep updating until it ends.`;
+  renderWins();
+
+  // today's totals: traders and volume are the leaderboard's own (the volume column added up); rounds are every round traded
+  for (const el of document.querySelectorAll(".totals .sk, .race-box.sk-box")) el.classList.remove("sk", "sk-box");
+  setNum($("t-traders"), "t-traders", rows.length, "int", true);
+  setNum($("t-rounds"), "t-rounds", rows.reduce((sum, r) => sum + r.rounds, 0), "int", true);
+  setNum($("t-volume"), "t-volume", rows.reduce((sum, r) => sum + r.vol, 0), "usd", true);
+  showUpdated();
+
+  // podium: today's top three
+  const top3 = rows.slice(0, 3);
+  $("podium-note").textContent = `since ${dayStartLocal()} · live`;
+  $("totals-note").textContent = `since ${dayStartLocal()} · live`;
+  const podWas = new Map([...$("podium").querySelectorAll(".pod")].map((el) => [el.dataset.u, el.getBoundingClientRect()]));
+  $("podium").innerHTML = top3.length ? top3.map((r, i) => `
+    <div class="card pod p${i + 1}" data-u="${esc(r.u)}" tabindex="0" role="button" aria-label="${esc(r.u)}, rank ${i + 1}">
+      <div class="top"><span class="place">${i + 1}</span>${avatar(r, "md")}<span class="name"><span>${esc(r.u)}</span>${r.v ? VER : ""}</span></div>
+      <div class="pnl num ${cls(r.pnl)}" data-k="pod|${esc(r.u)}" data-v="${r.pnl}" data-f="money" data-intro="1">${money(r.pnl)}</div>
+      ${spark(r.spark, 300, 44)}
+      <div class="sub"><span><b class="num">${r.rounds.toLocaleString("en-US")}</b> ${plural(r.rounds)}</span><span><b class="num">${wrText(r)}</b> won</span><span><b class="num">${money(r.vol, false)}</b> staked</span></div>
+    </div>`).join("") : `<div class="card pod-empty">Nobody has locked in a profit or a loss yet today. The day started at ${dayStartLocal()} your time.</div>`;
+  animateNums($("podium"));
+  if (podWas.size && !noMotion() && !document.hidden) for (const el of $("podium").querySelectorAll(".pod")) {
+    const was = podWas.get(el.dataset.u), now = el.getBoundingClientRect();
+    if (!was) play(el, [{ opacity: 0, transform: "scale(.94)" }, { opacity: 1, transform: "none" }], { duration: 450, easing: "ease-out" }); // new to the top three
+    else if (Math.abs(was.left - now.left) > 1 || Math.abs(was.top - now.top) > 1) play(el, [{ transform: `translate(${was.left - now.left}px, ${was.top - now.top}px)` }, { transform: "none" }], { duration: 700, easing: "cubic-bezier(.2,.8,.2,1)" });
+  }
+
+  // day strip: each day with its winner. Clicking a day opens its ranking; clicking it again closes it.
+  if (days.days.length) {
+    const chip = (k, title, top, live) => `<button class="day" data-day="${k}" aria-pressed="${period === k}">
+      <span class="dt">${title}${live ? "<em>live</em>" : ""}</span>
+      ${top ? `<span class="dw">${avatar(top, "sm")}<span>${esc(top.u)}</span></span><b class="num ${cls(top.pnl)}">${money(top.pnl)}</b>` : `<span class="dw muted">No trades</span>`}
+    </button>`;
+    const at = $("days").scrollLeft; // re-rendering must not jump the strip back to the start
+    $("days").innerHTML = days.days.map((d) => chip(d.d, dayTitle(d.d), dayRows(d.d)[0], d.d === days.today)).join("");
+    $("days").hidden = false;
+    $("days").scrollLeft = at;
+  } else $("days").hidden = true;
+  $("board-period").innerHTML = period ? `${dayTitle(period)}${period === days.today ? ` · since ${dayStartLocal()}` : ""} <button class="clear" data-day="" aria-label="Close this day">✕</button>` : "";
+  // the ranking is always one day's. With no day open there is nothing to rank, so only the strip shows.
+  $("tabs").hidden = !period;
+  if (!period) {
+    $("hint").hidden = true;
+    $("table").innerHTML = days.days.length ? `<div class="pickday">Pick a day to see its ranking.</div>` : `<div class="empty"><b>No day results yet</b>The first sale or payout starts the record.</div>`;
+  } else {
+    if (!$("tabs").querySelector(".tab")) $("tabs").innerHTML = TABS.map((x) => `<button class="tab" role="tab" data-tab="${x.id}">${x.label}</button>`).join("");
+    for (const b of $("tabs").querySelectorAll(".tab")) b.setAttribute("aria-selected", String(b.dataset.tab === tab));
+    movePill($("tabs"), '.tab[aria-selected="true"]');
+    const T = TABS.find((x) => x.id === tab), list = sorted(T);
+    const from = Date.parse(period + "T00:00:00Z");
+    const dayHint = period === days.today ? `Today so far. The day started at ${dayStartLocal()} your time.` : `A finished day: ${day(from)}, ${hm(from)} to ${day(from + 864e5)}, ${hm(from + 864e5)}, your time.`;
+    $("hint").hidden = false;
+    $("hint").textContent = T.hint ? `${dayHint} ${T.hint}` : dayHint;
+    if (!list.length) {
+      $("table").innerHTML = `<div class="empty"><b>Nobody qualifies</b>Try another tab or another day.</div>`;
+    } else {
+      const name = (r) => `<span style="overflow:hidden;text-overflow:ellipsis">${esc(r.u)}</span>${r.v ? VER : ""}`;
+      // the number next to the main one: the day's best round, or PnL when the tab ranks by something else
+      const side = tab === "pnl" || tab === "rekt"
+        ? { head: "Best market", short: "Best", val: (r) => (r.best > 0 ? `<span class="pos">${money(r.best)}</span>` : "–") }
+        : { head: "PnL", short: "PnL", val: (r) => `<span class="${cls(r.pnl)}">${money(r.pnl)}</span>` };
+      const off = (r) => (byName.has(r.u.toLowerCase()) ? "" : " off"); // not on today's board: the row is not clickable
+      // the ranked number, tagged so the next render can roll it from this value (and float the PnL difference beside it)
+      const main = (r, sfx) => `<span class="mainv ${T.f === "money" ? cls(T.num(r)) : ""}" data-k="${period}|${tab}|${esc(r.u)}${sfx}" data-v="${T.num(r)}" data-f="${T.f}"${tab === "pnl" ? ' data-delta="1"' : ""}>${fmt[T.f](T.num(r))}</span>`;
+      const before = rowTops();
+      const body = list.slice(0, shown).map((r, i) => `<tr data-u="${esc(r.u)}" class="${me && me.u === r.u ? "me" : ""}${off(r)}">
+          <td><span class="rk"><span class="n num">${i + 1}</span></span></td>
+          <td><span class="trader">${avatar(r)}<span style="min-width:0"><span class="nm" style="display:flex;align-items:center;gap:4px">${name(r)}</span></span></span></td>
+          <td class="main num">${main(r, "")}</td>
+          <td class="num">${side.val(r)}</td>
+          <td class="num">${r.rounds.toLocaleString("en-US")}</td>
+          <td class="num"><span class="wr">${wrText(r)}<i><u style="width:${(winRate(r) * 100).toFixed(0)}%"></u></i></span></td>
+          <td class="num">${money(r.vol, false)}</td>
+        </tr>`).join("");
+      // the same rows as cards, shown instead of the table on phones
+      const cards = list.slice(0, shown).map((r, i) => `<div class="mrow ${me && me.u === r.u ? "me" : ""}${off(r)}" data-u="${esc(r.u)}">
+          <div class="mtop"><span class="rk"><span class="n num">${i + 1}</span></span>${avatar(r)}<span class="nm">${name(r)}</span><span class="mmain num">${main(r, "|m")}</span></div>
+          <div class="mstats num">
+            <span><i>${side.short}</i><b>${side.val(r)}</b></span>
+            <span><i>Settled</i>${r.rounds.toLocaleString("en-US")}</span><span><i>Won</i>${wrText(r)}</span><span><i>Staked</i>${money(r.vol, false)}</span>
+          </div>
+        </div>`).join("");
+      $("table").innerHTML = `<div class="tscroll"><table>
+        <thead><tr><th>#</th><th>Trader</th><th>${T.head}</th><th>${side.head}</th><th>Settled</th><th>Won</th><th>Staked</th></tr></thead>
+        <tbody>${body}</tbody></table></div>
+        <div class="mlist">${cards}</div>
+        ${list.length > shown ? `<div class="more"><button class="btn" id="more">Show ${Math.min(PAGE, list.length - shown)} more of ${list.length - shown}</button></div>` : ""}`;
+      moveRows(before, `${period}|${tab}`);
+      animateNums($("table"));
+    }
+  }
+  slide = null; // a day change that ended on an empty state has nothing to slide
+  renderYou();
+  raceKick();
+}
+
+let youShown = null; // whose card is up, so it only animates in when the picked trader changes
+function renderYou() {
+  const q = $("q").value.trim().replace(/^@/, "");
+  if (me) {
+    const above = rows[me.rank - 2];
+    const gap = me.rank === 1 ? (rows[1] ? `Leading today by <b>${money(me.pnl - rows[1].pnl, false)}</b>.` : "The only trader on today's board so far.")
+      : `<b class="num">${money(above.pnl - me.pnl + 0.01, false)}</b> more to pass <b>${esc(above.u)}</b> for #${me.rank - 1} today.`;
+    $("you").innerHTML = `<div class="you">
+      <div class="rank num${me.rank <= 3 ? ` p${me.rank}` : ""}">#${me.rank}<small>OF ${rows.length} TODAY</small></div>
+      <div class="info">
+        <div class="who">${avatar(me, "md")}<b>${esc(me.u)}</b>${me.v ? VER : ""}</div>
+        <div class="stats num"><span>Settled<b>${me.rounds.toLocaleString("en-US")}</b></span><span>Won<b>${(winRate(me) * 100).toFixed(0)}%</b></span><span>Staked<b>${money(me.vol, false)}</b></span><span>Best market<b${me.best ? ' class="pos"' : ""}>${me.best ? money(me.best) : "–"}</b></span></div>
+        <div class="gap">${gap}</div>
+      </div>
+      <div class="pnl ${{ pos: "gain", neg: "loss" }[cls(me.pnl)] || ""}">
+        <small>Net profit / loss today</small>
+        <span class="v num ${cls(me.pnl)}" data-k="you|${esc(me.u)}" data-v="${me.pnl}" data-f="money" data-intro="1" data-delta="1">${money(me.pnl)}</span>
+        ${spark(me.spark, 300, 38)}
+      </div>
+      <div class="acts"><button class="btn pink" id="open-share">Share my rank</button><a class="btn ref" href="${REF}" target="_blank" rel="noopener">Trade on XO ↗</a></div>
+    </div>`;
+    animateNums($("you"));
+    if (youShown !== me.u && !noMotion() && !document.hidden) play($("you").firstElementChild, [{ opacity: 0, transform: "translateY(8px) scale(.985)" }, { opacity: 1, transform: "none" }], { duration: 350, easing: "cubic-bezier(.2,.8,.2,1)" });
+    youShown = me.u;
+    return;
+  }
+  youShown = null;
+  if (q && searched) {
+    $("you").innerHTML = `<div class="miss">
+      <div><b>${esc(q)} isn't on today's board</b>
+      <p>Either no settled Pulse round yet today (the day started at ${dayStartLocal()} your time), or the profile is private (private profiles aren't ranked). One settled round is enough to get on.</p></div>
+      <a class="cta ref" href="${REF}" target="_blank" rel="noopener">Trade a round ↗</a>
+    </div>`;
+  } else $("you").innerHTML = "";
+}
+
+// the top-three cards lean towards the cursor (mouse only: on a phone it would fight scrolling)
+$("podium").addEventListener("pointermove", (e) => {
+  const card = e.target.closest(".pod");
+  if (!card || e.pointerType !== "mouse" || noMotion()) return;
+  const r = card.getBoundingClientRect(), x = (e.clientX - r.left) / r.width - 0.5, y = (e.clientY - r.top) / r.height - 0.5;
+  card.style.transform = `perspective(800px) rotateX(${(-y * 7).toFixed(2)}deg) rotateY(${(x * 7).toFixed(2)}deg) translateY(-2px)`;
+});
+$("podium").addEventListener("pointerout", (e) => { const card = e.target.closest(".pod"); if (card && !card.contains(e.relatedTarget)) card.style.transform = ""; });
+
+// ---------- search ----------
+let searched = false, hot = -1;
+function suggest() {
+  const q = $("q").value.trim().replace(/^@/, "").toLowerCase(), box = $("sugg");
+  if (!q) { box.hidden = true; $("q").setAttribute("aria-expanded", "false"); return; }
+  const hits = rows.filter((r) => r.u.toLowerCase().includes(q)).sort((a, b) => (b.u.toLowerCase().startsWith(q) - a.u.toLowerCase().startsWith(q)) || a.rank - b.rank).slice(0, 8);
+  hot = -1;
+  box.innerHTML = hits.map((r) => `<button role="option" data-u="${esc(r.u)}">${avatar(r)}<span style="font-weight:600;overflow:hidden;text-overflow:ellipsis">${esc(r.u)}</span><span class="rk num">#${r.rank}</span></button>`).join("");
+  box.hidden = !hits.length;
+  $("q").setAttribute("aria-expanded", String(!!hits.length));
+}
+function pick(name, scroll = true) {
+  const r = byName.get(String(name).toLowerCase().replace(/^@/, ""));
+  searched = true;
+  me = r || null;
+  $("q").value = r ? r.u : String(name); // the card below names whoever is in the box, so it must be this trader
+  $("sugg").hidden = true;
+  render();
+  if (scroll) $("find").scrollIntoView({ behavior: "smooth", block: "start" });
+}
+$("q").addEventListener("input", () => { searched = false; if (me) { me = null; render(); } else renderYou(); suggest(); });
+$("q").addEventListener("keydown", (e) => {
+  const items = [...$("sugg").querySelectorAll("button")];
+  if (e.key === "ArrowDown" || e.key === "ArrowUp") {
+    if (!items.length) return;
+    e.preventDefault();
+    hot = (hot + (e.key === "ArrowDown" ? 1 : -1) + items.length) % items.length;
+    items.forEach((b, i) => b.classList.toggle("on", i === hot));
+  } else if (e.key === "Enter") {
+    e.preventDefault();
+    pick(hot >= 0 && items[hot] ? items[hot].dataset.u : $("q").value.trim(), false);
+  } else if (e.key === "Escape") $("sugg").hidden = true;
+});
+document.addEventListener("click", (e) => {
+  const u = e.target.closest("[data-u]"), t = e.target.closest("[data-tab]");
+  if (e.target.closest("#open-share")) return openShare();
+  if (e.target.closest("#more")) { shown += PAGE; return render(); }
+  const dy = e.target.closest("[data-day]");
+  if (dy) {
+    const next = dy.dataset.day === period ? null : dy.dataset.day || null, order = (k) => days.days.findIndex((d) => d.d === k);
+    slide = !next || !period ? 0 : order(next) > order(period) ? 1 : -1; // later in the strip = further right
+    const go = () => { period = next; shown = PAGE; render(); };
+    if (noMotion() || document.hidden || !$("table").firstElementChild) return go();
+    const out = $("table").animate([{ opacity: 1, transform: "none" }, { opacity: 0, transform: `translateX(${-slide * 28}px)` }], { duration: 130, easing: "ease-in", fill: "forwards" });
+    // on a timer, not on the animation's promise: the click must land even if the browser isn't animating
+    return void setTimeout(() => { out.cancel(); go(); }, 130);
+  }
+  if (t) { tab = t.dataset.tab; shown = PAGE; return render(); }
+  // rows in the table only do something for traders on today's board (a past day's row has no "today" to show)
+  if (u && u.closest("#table") && !byName.has(u.dataset.u.toLowerCase())) return;
+  if (u) return pick(u.dataset.u, !u.closest(".sugg"));
+  if (!e.target.closest(".field")) $("sugg").hidden = true;
+});
+document.addEventListener("keydown", (e) => { if (e.key === "Enter" && e.target.classList.contains("pod")) pick(e.target.dataset.u); });
+
+// ---------- boards ----------
+// The data file holds both boards; `days` is the open one, in the shape the rest of this page reads.
+const BOARDS = {
+  m: { chip: "XO Markets", noun: "markets", word: "Markets", lede: "Every day on XO Market's prediction markets: who locked in the most profit, who's racing ahead, and where you stand. Past days are in the leaderboard." },
+  c: { chip: "XO Convictions", noun: "convictions", word: "Convictions", lede: "Every day on XO Market's convictions: who locked in the most profit, who's racing ahead, and where you stand. Past days are in the leaderboard." },
+};
+let board = location.hash === "#convictions" ? "c" : "m", RAW = null;
+const view = "today", OFF = null, raceComp = () => false; // the Pulse page's competition view isn't part of this one
+function boardData(dd) {
+  const b = dd[board] || { days: [], spark: {}, big: [] };
+  return { updatedAt: dd.updatedAt, today: dd.today, users: dd.users, markets: dd.markets || {}, days: b.days, todaySpark: b.spark, big: b.big || [], event: null, hidden: 0 };
+}
+function setBoard(b) {
+  if (b === board || !BOARDS[b]) return;
+  board = b;
+  history.replaceState(null, "", location.pathname + location.search + (b === "c" ? "#convictions" : ""));
+  for (const x of $("views").querySelectorAll("[data-board]")) x.setAttribute("aria-pressed", String(x.dataset.board === b));
+  movePill($("views"), '[aria-pressed="true"]');
+  if (!RAW) return;
+  days = boardData(RAW); dayCache.clear();
+  rows = dayRows(days.today);
+  byName = new Map(rows.map((r) => [r.u.toLowerCase(), r]));
+  if (me) me = byName.get(me.u.toLowerCase()) || null;
+  periodSet = false; period = null;
+  if (days.days.length) { period = days.days.some((x) => x.d === days.today) ? days.today : days.days[0].d; periodSet = true; }
+  render();
+  race.played = false;
+  if (race.visible) racePlay();
+}
+$("views").addEventListener("click", (e) => { const x = e.target.closest("[data-board]"); if (x) setBoard(x.dataset.board); });
+for (const x of $("views").querySelectorAll("[data-board]")) x.setAttribute("aria-pressed", String(x.dataset.board === board)); // a #convictions link opens that board
+const marketUrl = (m) => `https://beta.xo.market/event/${encodeURIComponent(m[1])}?r=andriy_shkinder`;
+function renderWins() {
+  const list = (days.big || []).filter((x) => x[2] > 0);
+  $("wins-note").textContent = `since ${dayStartLocal()}`;
+  $("wins-list").innerHTML = list.length ? list.slice(0, 5).map(([u, id, pnl]) => {
+    const m = days.markets[id] || ["A market", "", ""], [a, v, c] = days.users[u] || ["", 0, ""];
+    return `<a class="win" href="${m[1] ? marketUrl(m) : REF}" target="_blank" rel="noopener">
+      ${m[2] ? `<img class="pic" src="${esc(m[2])}" alt="" loading="lazy" referrerpolicy="no-referrer">` : `<span class="pic"></span>`}
+      <span style="min-width:0"><span class="t">${esc(m[0])}</span><span class="by">${avatar({ u, a, v, c }, "sm")}<span>${esc(u)}</span>${v ? VER : ""}</span></span>
+      <b class="p num pos">${money(pnl)}</b></a>`;
+  }).join("") : `<div class="wins-empty">No winning ${BOARDS[board].noun} settled yet today.</div>`;
+}
+
+// ---------- race chart ----------
+// Canvas line race in the spirit of the Pulse chart: one line per trader, a dashed break-even line where Pulse has
+// its price to beat, and each trader's avatar riding the head of their line.
+const RACE_COLORS = ["#ff5c8a", "#7c5cff", "#2fc04a", "#f7931a", "#18b6d9", "#d9a400", "#e5484d", "#3b82f6", "#c026d3", "#14b8a6", "#65a30d", "#ea580c", "#4f46e5", "#be185d", "#0e7490", "#a16207"];
+const RACE_MS = 8000, SUB = 6;
+const race = { n: 10, log: true, p: 1, hover: null, playing: false, t0: 0, visible: false, looping: false, played: false, morph: 0, hits: [], imgs: new Map() };
+
+// monotone cubic through [0, ...spark], sampled SUB times per step: smooth like the Pulse line, never overshoots
+function dense(r) {
+  if (r._d) return r._d;
+  const v = [0, ...r.spark], n = v.length, m = new Array(n), out = [];
+  for (let i = 0; i < n; i++) {
+    const a = i ? v[i] - v[i - 1] : v[1] - v[0], b = i < n - 1 ? v[i + 1] - v[i] : a;
+    m[i] = a * b <= 0 ? 0 : (2 * a * b) / (a + b);
+  }
+  for (let i = 0; i < n - 1; i++) for (let k = 0; k < SUB; k++) {
+    const t = k / SUB, t2 = t * t, t3 = t2 * t;
+    out.push((2 * t3 - 3 * t2 + 1) * v[i] + (t3 - 2 * t2 + t) * m[i] + (-2 * t3 + 3 * t2) * v[i + 1] + (t3 - t2) * m[i + 1]);
+  }
+  out.push(v[n - 1]);
+  const first = out.findIndex((x) => Math.abs(x) > 0.004);
+  out.from = first < 0 ? out.length - 1 : Math.max(0, first - SUB); // where this trader's first round lands
+  return (r._d = out);
+}
+// while new data is settling in, each line is drawn part-way between what it was and what it is now
+const MORPH_MS = 1500;
+function series(r) {
+  const d = dense(r);
+  if (!race.morph) return d;
+  const p = (performance.now() - race.morph) / MORPH_MS;
+  if (p >= 1) return d;
+  const e = 1 - Math.pow(1 - p, 3), f = r._from; // someone new to the board grows up from the $0 line
+  const out = d.map((v, i) => { const o = f ? f[Math.min(i, f.length - 1)] : 0; return o + (v - o) * e; });
+  out.from = f ? Math.min(d.from, f.from) : d.from;
+  return out;
+}
+const valueAt = (d, p) => { const f = p * (d.length - 1), i = Math.min(d.length - 2, Math.floor(f)); return d[i] + (d[i + 1] - d[i]) * (f - i); };
+function raceImg(r) {
+  if (!r.a) return null;
+  let im = race.imgs.get(r.u);
+  if (!im) { im = new Image(); im.referrerPolicy = "no-referrer"; im.onload = raceKick; im.src = avatarUrl(r.a); race.imgs.set(r.u, im); }
+  return im.complete && im.naturalWidth ? im : null;
+}
+function raceSet() {
+  const set = rows.slice(0, race.n).map((r, i) => ({ r, color: RACE_COLORS[i % RACE_COLORS.length] }));
+  if (me && !set.some((x) => x.r === me)) set.push({ r: me, color: null }); // drawn in the ink colour
+  return set;
+}
+
+function drawRace() {
+  const cv = $("race-cv"), box = cv.parentElement, W = box.clientWidth, H = box.clientHeight;
+  if (!days || !W) return;
+  const dpr = Math.min(window.devicePixelRatio || 1, 2);
+  if (cv.width !== Math.round(W * dpr) || cv.height !== Math.round(H * dpr)) { cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr); }
+  const c = cv.getContext("2d"), css = getComputedStyle(root), V = (k) => css.getPropertyValue(k).trim();
+  const ink = V("--ink"), ink2 = V("--ink-2"), ink3 = V("--ink-3"), line = V("--line"), card = V("--card"), control = V("--control");
+  const F = (w, px) => `${w} ${px}px "Open Runde", system-ui, sans-serif`;
+  c.setTransform(dpr, 0, 0, dpr, 0, 0);
+  c.clearRect(0, 0, W, H);
+  const set = raceSet();
+  for (const x of set) if (!x.color) x.color = ink;
+  race.hits = [];
+  if (!set.length) { c.fillStyle = ink2; c.font = F(500, 14); c.textAlign = "center"; c.textBaseline = "middle"; c.fillText("Today's race starts with the first sale or payout.", W / 2, H / 2); return; }
+
+  const narrow = W < 560;
+  const tags = raceComp() && !!OFF; // XO-board tags beside the names
+  const L = 8, R = W - (narrow ? (tags ? 156 : 112) : tags ? 250 : 190), T = 26, B = H - 26, pw = R - L, ph = B - T;
+  const P = race.hover != null ? race.hover : race.playing ? race.p : 1;
+  // today: from 00:00 UTC to the last update; the competition: from its start to the last update (or its end)
+  const comp = raceComp();
+  const t0 = comp ? days.event.start : Date.parse(days.today + "T00:00:00Z"), t1 = comp ? days.event.sparkTo || days.updatedAt : days.updatedAt;
+
+  // scale: signed log by default, because one whale would flatten everyone else on a linear axis
+  let lo = 0, hi = 0;
+  const lines = new Map(set.map((x) => [x.r, series(x.r)])); // one series per trader for this frame
+  for (const d of lines.values()) for (const v of d) { if (v < lo) lo = v; if (v > hi) hi = v; }
+  const tr = race.log ? (v) => Math.sign(v) * Math.log10(1 + Math.abs(v)) : (v) => v;
+  let a = tr(lo), b = tr(hi);
+  const pad = Math.max((b - a) * 0.08, race.log ? 0.15 : 1);
+  a -= pad; b += pad;
+  const X = (p) => L + p * pw, Y = (v) => T + ((b - tr(v)) / (b - a)) * ph;
+
+  // grid
+  let ticks = [];
+  if (race.log) { for (let e = 1; e <= 7; e++) ticks.push(10 ** e, -(10 ** e)); }
+  else { const raw = (hi - lo || 1) / 5, mag = 10 ** Math.floor(Math.log10(raw)), step = [1, 2, 5, 10].map((k) => k * mag).find((k) => k >= raw); for (let v = Math.ceil(lo / step) * step; v <= hi; v += step) if (Math.abs(v) > step / 2) ticks.push(v); }
+  c.lineWidth = 1; c.font = F(500, 11); c.textAlign = "left"; c.textBaseline = "bottom";
+  for (const v of ticks) {
+    const y = Y(v);
+    if (y < T + 4 || y > B - 4) continue;
+    c.strokeStyle = line; c.globalAlpha = 0.7; c.beginPath(); c.moveTo(L, Math.round(y) + 0.5); c.lineTo(R, Math.round(y) + 0.5); c.stroke(); c.globalAlpha = 1;
+    c.fillStyle = ink3; c.fillText(money(v).replace(/\.00$/, ""), L + 2, y - 3);
+  }
+  // hours along the bottom on the visitor's clock; over a competition, days (UTC)
+  c.textBaseline = "top"; c.textAlign = "center";
+  const span = t1 - t0, long = span > 2 * 864e5;
+  const step = long ? [1, 2, 3, 7].map((d) => d * 864e5).find((d) => span / d <= (narrow ? 4 : 8)) || 7 * 864e5 : [1, 2, 3, 6, 12].map((h) => h * 36e5).find((h) => span / h <= (narrow ? 4 : 8));
+  const d0 = new Date(t0);
+  if (long) d0.setUTCHours(0, 0, 0, 0); else d0.setHours(0, 0, 0, 0);
+  for (let t = +d0; t < t1; t += step) {
+    if (t <= t0) continue;
+    const x = X((t - t0) / span);
+    if (x < L + 18 || x > R - 18) continue;
+    c.fillStyle = ink3; c.fillText(long ? dayUTC(t) : hm(t), x, B + 8);
+    c.strokeStyle = line; c.globalAlpha = 0.5; c.beginPath(); c.moveTo(Math.round(x) + 0.5, T); c.lineTo(Math.round(x) + 0.5, B); c.stroke(); c.globalAlpha = 1;
+  }
+  // break-even, drawn like Pulse's price to beat
+  const y0 = Math.round(Y(0)) + 0.5;
+  c.strokeStyle = ink3; c.setLineDash([5, 5]); c.beginPath(); c.moveTo(L, y0); c.lineTo(R, y0); c.stroke(); c.setLineDash([]);
+  c.font = F(600, 11); c.fillStyle = ink2; c.textAlign = "left"; c.textBaseline = "bottom"; c.fillText("$0", L + 2, y0 - 3);
+
+  // lines: leader last so it sits on top, the picked trader above everyone
+  const order = [...set].reverse().sort((p, q) => (p.r === me) - (q.r === me));
+  c.lineJoin = "round"; c.lineCap = "round";
+  for (const s of order) {
+    const d = lines.get(s.r), M = d.length - 1, K = P * M, k = Math.min(M, Math.floor(K));
+    const isMe = s.r === me;
+    c.strokeStyle = s.color;
+    if (race.hover != null && P < 1) { // the part still ahead of the cursor
+      const from = Math.max(k + 1, d.from);
+      c.globalAlpha = 0.2; c.lineWidth = 1.5; c.beginPath();
+      if (K >= d.from) c.moveTo(X(P), Y(valueAt(d, P))); else c.moveTo(X(d.from / M), Y(d[d.from]));
+      for (let i = from; i <= M; i++) c.lineTo(X(i / M), Y(d[i]));
+      c.stroke(); c.globalAlpha = 1;
+    }
+    if (K < d.from) continue; // hasn't played yet at this point in time
+    c.lineWidth = isMe ? 3.5 : 2;
+    c.globalAlpha = me && !isMe ? 0.55 : 1;
+    c.beginPath(); c.moveTo(X(d.from / M), Y(d[d.from]));
+    for (let i = d.from + 1; i <= k; i++) c.lineTo(X(i / M), Y(d[i]));
+    if (K > k) c.lineTo(X(P), Y(valueAt(d, P)));
+    c.stroke(); c.globalAlpha = 1;
+  }
+
+  // heads + labels, pushed apart so they never overlap
+  const hx = X(P), gap = Math.max(15, Math.min(28, ph / set.length)), av = Math.min(22, gap - 5), fs = gap < 20 ? 11 : 12.5;
+  const heads = set.filter((s) => P * (lines.get(s.r).length - 1) >= lines.get(s.r).from)
+    .map((s) => { const v = valueAt(lines.get(s.r), P); return { ...s, v, y: Y(v), ly: Y(v) }; }).sort((p, q) => p.ly - q.ly);
+  if (heads.length) {
+    for (let i = 1; i < heads.length; i++) heads[i].ly = Math.max(heads[i].ly, heads[i - 1].ly + gap);
+    const over = heads[heads.length - 1].ly - (B - 2);
+    if (over > 0) { heads[heads.length - 1].ly -= over; for (let i = heads.length - 2; i >= 0; i--) heads[i].ly = Math.min(heads[i].ly, heads[i + 1].ly - gap); }
+  }
+  const phase = (performance.now() % 1800) / 1800;
+  for (const h of heads) {
+    const isMe = h.r === me, lead = h.r === set[0].r, lx = hx + 14;
+    if (Math.abs(h.ly - h.y) > 2) { c.strokeStyle = h.color; c.globalAlpha = 0.45; c.lineWidth = 1; c.beginPath(); c.moveTo(hx, h.y); c.lineTo(lx - 2, h.ly); c.stroke(); c.globalAlpha = 1; }
+    if ((lead || isMe) && P === 1 && !noMotion()) { c.strokeStyle = h.color; c.globalAlpha = 0.5 * (1 - phase); c.lineWidth = 2; c.beginPath(); c.arc(hx, h.y, 5 + phase * 9, 0, 6.2832); c.stroke(); c.globalAlpha = 1; }
+    c.fillStyle = card; c.beginPath(); c.arc(hx, h.y, 5.5, 0, 6.2832); c.fill();
+    c.fillStyle = h.color; c.beginPath(); c.arc(hx, h.y, 3.8, 0, 6.2832); c.fill();
+    // avatar
+    const cx = lx + av / 2, img = raceImg(h.r);
+    c.save(); c.beginPath(); c.arc(cx, h.ly, av / 2, 0, 6.2832); c.clip();
+    c.fillStyle = h.color; c.fillRect(cx - av / 2, h.ly - av / 2, av, av);
+    if (img) c.drawImage(img, cx - av / 2, h.ly - av / 2, av, av);
+    else { c.fillStyle = "#fff"; c.font = F(700, av * 0.5); c.textAlign = "center"; c.textBaseline = "middle"; c.fillText((h.r.u[0] || "?").toUpperCase(), cx, h.ly + 0.5); }
+    c.restore();
+    c.strokeStyle = isMe ? ink : h.color; c.lineWidth = isMe ? 2 : 1.5; c.beginPath(); c.arc(cx, h.ly, av / 2 + (isMe ? 1.5 : 0.5), 0, 6.2832); c.stroke();
+    // name + PnL
+    let tx = lx + av + 6;
+    c.textAlign = "left"; c.textBaseline = "middle";
+    if (!narrow) {
+      c.font = F(isMe ? 700 : 600, fs); c.fillStyle = ink;
+      let name = h.r.u; while (name.length > 4 && c.measureText(name).width > 86) name = name.slice(0, -2) + "…";
+      c.fillText(name, tx, h.ly + 0.5); tx += c.measureText(name).width + 6;
+    }
+    c.font = F(700, fs); c.fillStyle = h.v > 0.004 ? V("--pos") : h.v < -0.004 ? V("--neg") : ink3;
+    const txt = money(h.v); c.fillText(txt, tx, h.ly + 0.5);
+    let tagEnd = tx + c.measureText(txt).width;
+    if (tags) {
+      const st = offStatus(h.r.u);
+      if (st) {
+        const label = st.text, fsz = Math.max(10, fs - 1.5);
+        c.font = F(600, fsz);
+        const tw = c.measureText(label).width + 12, th = fsz + 7, bx = tagEnd + 7, by = h.ly - th / 2;
+        const tone = { ok: ["--pos-soft", "--pos"], near: ["--down-soft", "--down-text"], need: ["--up-soft", "--up-text"], out: ["--control", "--ink-3"] }[st.tone];
+        c.fillStyle = V(tone[0]); c.beginPath(); c.roundRect(bx, by, tw, th, th / 2); c.fill();
+        c.fillStyle = V(tone[1]); c.textAlign = "left"; c.fillText(label, bx + 6, h.ly + 0.5);
+        tagEnd = bx + tw;
+      }
+    }
+    race.hits.push({ u: h.r.u, x: lx - 4, y: h.ly - gap / 2, w: tagEnd - lx + 8, h: gap });
+  }
+
+  // cursor: time under the pointer
+  if (race.hover != null) {
+    c.strokeStyle = ink3; c.lineWidth = 1; c.beginPath(); c.moveTo(Math.round(hx) + 0.5, T - 6); c.lineTo(Math.round(hx) + 0.5, B); c.stroke();
+    const text = long ? `${dayUTC(t0 + P * span)}, ${fmtUTC(t0 + P * span).slice(-5)} UTC` : hm(t0 + P * span);
+    c.font = F(600, 11); const tw = c.measureText(text).width + 14, px = Math.max(L, Math.min(W - tw, hx - tw / 2));
+    c.fillStyle = control; c.beginPath(); c.roundRect(px, T - 24, tw, 20, 10); c.fill();
+    c.fillStyle = ink2; c.textAlign = "left"; c.textBaseline = "middle"; c.fillText(text, px + 7, T - 13.5);
+  }
+}
+
+function raceFrame(now) {
+  race.looping = false;
+  if (race.playing) { race.p = Math.min(1, (now - race.t0) / RACE_MS); if (race.p >= 1) racePlaying(false); }
+  if (race.morph && now - race.morph > MORPH_MS) race.morph = 0;
+  drawRace();
+  if (race.visible && !noMotion()) raceKick();
+}
+function racePlaying(on) { race.playing = on; $("race-ic").textContent = on ? "❚❚" : "▶"; $("race-tx").textContent = on ? "Racing" : "Replay"; }
+function raceKick() { if (race.looping) return; race.looping = true; requestAnimationFrame(raceFrame); }
+function racePlay() {
+  if (noMotion()) return;
+  race.hover = null; race.p = 0; race.t0 = performance.now(); race.played = true;
+  racePlaying(true);
+  raceKick();
+}
+$("race-play").onclick = () => { if (race.playing) { racePlaying(false); raceKick(); } else racePlay(); };
+if (noMotion()) $("race-play").hidden = true;
+$("race-n").onclick = (e) => { const b = e.target.closest("button"); if (!b) return; race.n = +b.dataset.n; [...$("race-n").querySelectorAll("button")].forEach((x) => x.setAttribute("aria-pressed", String(x === b))); movePill($("race-n"), '[aria-pressed="true"]'); raceKick(); };
+$("race-scale").onclick = (e) => { const b = e.target.closest("button"); if (!b) return; race.log = b.dataset.log === "1"; [...$("race-scale").querySelectorAll("button")].forEach((x) => x.setAttribute("aria-pressed", String(x === b))); movePill($("race-scale"), '[aria-pressed="true"]'); raceKick(); };
+{
+  const cv = $("race-cv");
+  const at = (e) => { const b = cv.getBoundingClientRect(); return { x: e.clientX - b.left, y: e.clientY - b.top, w: b.width }; };
+  const hit = (q) => race.hits.find((h) => q.x >= h.x && q.x <= h.x + h.w && q.y >= h.y && q.y <= h.y + h.h);
+  cv.addEventListener("pointermove", (e) => {
+    const q = at(e), right = q.w - (q.w < 560 ? 112 : 190);
+    cv.style.cursor = hit(q) ? "pointer" : "crosshair";
+    if (race.playing) racePlaying(false);
+    race.hover = q.x > right ? null : Math.max(0, Math.min(1, (q.x - 8) / (right - 8)));
+    raceKick();
+  });
+  cv.addEventListener("pointerleave", () => { race.hover = null; raceKick(); });
+  cv.addEventListener("click", (e) => { const h = hit(at(e)); if (h && !raceComp()) pick(h.u, false); });
+  new IntersectionObserver(([en]) => {
+    race.visible = en.isIntersecting;
+    if (race.visible && days && !race.played) racePlay(); else if (race.visible) raceKick();
+  }, { threshold: 0.35 }).observe(cv);
+  new ResizeObserver(raceKick).observe(cv.parentElement);
+  document.fonts.ready.then(raceKick);
+  // the highlights are measured, so they are placed again whenever sizes can have changed
+  const placePills = () => { movePill($("views"), '[aria-pressed="true"]'); movePill($("race-n"), '[aria-pressed="true"]'); movePill($("race-scale"), '[aria-pressed="true"]'); if (!$("tabs").hidden) movePill($("tabs"), '.tab[aria-selected="true"]'); };
+  placePills();
+  document.fonts.ready.then(placePills);
+  const sized = new ResizeObserver(placePills);
+  for (const id of ["views", "race-n", "race-scale", "tabs"]) sized.observe($(id));
+  addEventListener("resize", placePills);
+}
+
+// ---------- share: an image or a short video of the picked trader's day ----------
+// Both are drawn on one 1200x675 canvas, in the page's current theme. They carry the date instead of "today",
+// because they outlive the day. The video is the day's PnL line being drawn, recorded straight from the canvas.
+const SITE = "maco-board.vercel.app";
+const MEDALS = [["#C7B583", "#867852", "#3A331F"], ["#B7BABE", "#75787C", "#2C2E30"], ["#B4967D", "#6E5A49", "#3A2E22"]]; // fill, ring, ink: the podium's gold, silver, bronze
+const CLIP = { lead: 500, draw: 5200, hold: 1800 }; // ms: before the line starts, while it is drawn, the final frame
+// X takes MP4; browsers that can only record WebM still get a file to keep
+const CLIP_TYPE = window.MediaRecorder ? ["video/mp4;codecs=avc1.42E01E", "video/mp4", "video/webm;codecs=vp9", "video/webm"].find((t) => MediaRecorder.isTypeSupported(t)) : null;
+const share = { mode: "image", face: null, png: null, video: null, rec: null, run: 0 }; // run: bumped to stop a clip that is no longer wanted
+const loadImg = async (url) => { try { const r = await fetch(url, { referrerPolicy: "no-referrer" }); if (!r.ok) return null; return await createImageBitmap(await r.blob()); } catch { return null; } };
+const toneOf = (v) => ({ pos: "pos", neg: "neg" }[cls(v)]); // undefined at break-even
+
+// what the image and the video share: page, card, header, site address. Returns the context and the palette.
+function cardBase() {
+  const c = $("cv").getContext("2d"), W = 1200, H = 675, F = '"Open Runde", system-ui, sans-serif';
+  const css = getComputedStyle(root), V = (k) => css.getPropertyValue(k).trim(), ink = V("--ink"), ink2 = V("--ink-2"), ink3 = V("--ink-3");
+  const rr = (x, y, w, h, rad) => { c.beginPath(); c.roundRect(x, y, w, h, rad); };
+  c.globalAlpha = 1; c.setLineDash([]); c.textAlign = "left"; c.textBaseline = "middle"; c.lineCap = "round"; c.lineJoin = "round";
+  c.fillStyle = V("--page"); c.fillRect(0, 0, W, H);
+  c.fillStyle = V("--card"); rr(40, 40, W - 80, H - 80, 36); c.fill();
+  c.strokeStyle = V("--line"); c.lineWidth = 2; rr(40, 40, W - 80, H - 80, 36); c.stroke();
+  c.fillStyle = "#ff87a6"; rr(84, 84, 56, 56, 14); c.fill();
+  c.strokeStyle = "#7a1230"; c.lineWidth = 5;
+  c.beginPath(); [[93, 114], [103, 114], [107, 101], [115, 124], [120, 108], [123, 114], [131, 114]].forEach(([x, y], i) => (i ? c.lineTo(x, y) : c.moveTo(x, y))); c.stroke();
+  c.fillStyle = ink; c.font = `700 30px ${F}`; c.fillText("Pulse Board", 156, 113);
+  c.textAlign = "right"; c.textBaseline = "alphabetic";
+  c.font = `600 20px ${F}`; c.fillStyle = ink2; c.fillText(`XO ${BOARDS[board].word} · ${dayUTC(Date.parse(days.today + "T12:00:00Z"))}`, W - 92, 120);
+  c.fillStyle = ink3; c.fillText(SITE, W - 92, 606);
+  c.textAlign = "left";
+  return { c, W, F, V, rr, ink, ink2, ink3 };
+}
+// the trader's picture (or initial) in a circle, and their name cut to fit
+function cardWho({ c, F, ink }, r, cx, cy, rad, x, y, px, max) {
+  c.save(); c.beginPath(); c.arc(cx, cy, rad, 0, 6.2832); c.clip();
+  c.fillStyle = /^#[0-9a-f]{6}$/i.test(r.c) ? r.c : "#a293ff"; c.fillRect(cx - rad, cy - rad, rad * 2, rad * 2);
+  if (share.face) c.drawImage(share.face, cx - rad, cy - rad, rad * 2, rad * 2);
+  else { c.fillStyle = "#fff"; c.font = `700 ${rad}px ${F}`; c.textAlign = "center"; c.textBaseline = "middle"; c.fillText((r.u[0] || "?").toUpperCase(), cx, cy + 2); }
+  c.restore(); c.textAlign = "left"; c.textBaseline = "alphabetic";
+  c.fillStyle = ink; c.font = `700 ${px}px ${F}`;
+  let name = r.u; while (c.measureText(name).width > max && name.length > 4) name = name.slice(0, -2) + "…";
+  c.fillText(name, x, y);
+}
+// a gold, silver or bronze label; returns its width
+function cardMedal({ c, F, rr }, rank, text, x, y, h, px) {
+  const [fill, ring, inkOn] = MEDALS[rank - 1];
+  c.font = `700 ${px}px ${F}`;
+  const w = c.measureText(text).width + h * 0.7;
+  c.fillStyle = fill; rr(x, y, w, h, h * 0.28); c.fill();
+  c.strokeStyle = ring; c.lineWidth = 2; rr(x + 1, y + 1, w - 2, h - 2, h * 0.28 - 1); c.stroke();
+  c.fillStyle = inkOn; c.textBaseline = "middle"; c.fillText(text, x + h * 0.35, y + h / 2 + 1); c.textBaseline = "alphabetic";
+  return w;
+}
+const ofTraders = () => `of ${rows.length} ${rows.length === 1 ? "trader" : "traders"}`;
+
+// the image: laid out like the trader's card on the page
+function drawCard(r) {
+  const k = cardBase(), { c, F, V, rr, ink, ink2, ink3 } = k;
+  // rank, with a medal for the top three
+  c.fillStyle = ink; c.font = `700 190px ${F}`; c.fillText(`#${r.rank}`, 80, 372);
+  const sx = 106 + c.measureText(`#${r.rank}`).width;
+  c.font = `600 26px ${F}`; c.fillStyle = ink3; c.fillText(ofTraders(), sx, 372);
+  if (r.rank <= 3) cardMedal(k, r.rank, ["1st place", "2nd place", "3rd place"][r.rank - 1], sx, 286, 44, 22);
+  cardWho(k, r, 124, 458, 40, 184, 472, 40, 420);
+  const stats = [["Settled", r.rounds.toLocaleString("en-US")], ["Won", (winRate(r) * 100).toFixed(0) + "%"], ["Staked", money(r.vol, false)], ["Best market", r.best > 0 ? money(r.best) : "–"]];
+  stats.forEach(([label, v], i) => {
+    const x = 84 + i * 150;
+    c.font = `500 19px ${F}`; c.fillStyle = ink3; c.fillText(label, x, 548);
+    c.font = `700 28px ${F}`; c.fillStyle = ink; c.fillText(v, x, 584);
+  });
+  // PnL panel with the day's line
+  const px = 700, py = 190, pw = 416, ph = 370, tone = toneOf(r.pnl), color = tone ? V(`--${tone}`) : ink3;
+  c.fillStyle = tone ? V(`--${tone}-soft`) : V("--control"); rr(px, py, pw, ph, 28); c.fill();
+  c.font = `600 22px ${F}`; c.fillStyle = ink2; c.fillText("Net profit / loss", px + 32, py + 54);
+  c.fillStyle = color;
+  const pnl = money(r.pnl);
+  let size = 76; c.font = `700 ${size}px ${F}`; while (c.measureText(pnl).width > pw - 64 && size > 40) { size -= 4; c.font = `700 ${size}px ${F}`; }
+  c.fillText(pnl, px + 32, py + 136);
+  const p = r.spark, mn = Math.min(0, ...p), mx = Math.max(0, ...p), sp = mx - mn || 1, gx = px + 32, gy = py + 176, gw = pw - 64, gh = 154;
+  const X = (i) => gx + (i / (p.length - 1)) * gw, Y = (v) => gy + gh - ((v - mn) / sp) * gh;
+  c.strokeStyle = ink3; c.globalAlpha = 0.4; c.lineWidth = 2; c.setLineDash([4, 6]); c.beginPath(); c.moveTo(gx, Y(0)); c.lineTo(gx + gw, Y(0)); c.stroke(); c.setLineDash([]); c.globalAlpha = 1;
+  c.strokeStyle = color; c.lineWidth = 5; c.beginPath(); p.forEach((v, i) => (i ? c.lineTo(X(i), Y(v)) : c.moveTo(X(i), Y(v)))); c.stroke();
+  c.fillStyle = color; c.beginPath(); c.arc(X(p.length - 1), Y(p[p.length - 1]), 8, 0, 6.2832); c.fill();
+}
+
+// one frame of the video, `ms` into it: the day's line is drawn left to right and the PnL counts along with it
+function drawClip(r, ms) {
+  const k = cardBase(), { c, W, F, V, rr, ink, ink2, ink3 } = k;
+  const d = dense(r), M = d.length - 1, u = Math.min(1, Math.max(0, (ms - CLIP.lead) / CLIP.draw));
+  const p0 = d.from / M, p = p0 + (1 - p0) * (u < 0.5 ? 2 * u * u : 1 - 2 * (1 - u) * (1 - u)); // starts at the trader's first round, not at the empty hours before it
+  const v = valueAt(d, p), tone = toneOf(v), color = tone ? V(`--${tone}`) : ink3;
+  // who and where they stand
+  cardWho(k, r, 124, 208, 40, 184, 206, 36, 440);
+  let x = 184;
+  if (r.rank <= 3) x += cardMedal(k, r.rank, `#${r.rank}`, x, 220, 34, 20) + 10;
+  else { c.font = `700 22px ${F}`; c.fillStyle = ink; c.fillText(`#${r.rank}`, x, 245); x += c.measureText(`#${r.rank}`).width + 8; }
+  c.font = `600 22px ${F}`; c.fillStyle = ink3; c.fillText(ofTraders(), x, 245);
+  // the number the line has reached
+  c.textAlign = "right";
+  c.font = `600 20px ${F}`; c.fillStyle = ink2; c.fillText("Net profit / loss", W - 92, 186);
+  c.font = `700 64px ${F}`; c.fillStyle = color; c.fillText(money(v), W - 92, 248);
+  // chart: hours along the bottom, the $0 line, the day's line up to this moment
+  const gx = 84, gy = 296, gw = W - 176, gh = 224, t0 = Date.parse(days.today + "T00:00:00Z"), span = days.updatedAt - t0;
+  let mn = 0, mx = 0; for (const y of d) { if (y < mn) mn = y; if (y > mx) mx = y; }
+  const X = (i) => gx + (i / M) * gw, Y = (y) => gy + gh - ((y - mn) / (mx - mn || 1)) * gh, y0 = Y(0), K = p * M, hx = gx + p * gw, hy = Y(v);
+  c.textAlign = "center"; c.font = `500 18px ${F}`; c.lineWidth = 1;
+  const step = ([1, 2, 3, 6].find((h) => span / (h * 36e5) <= 7) || 12) * 36e5, first = new Date(t0); first.setHours(0, 0, 0, 0);
+  for (let t = +first; t < t0 + span; t += step) {
+    const tx = gx + ((t - t0) / span) * gw;
+    if (tx < gx + 40 || tx > gx + gw - 40) continue;
+    c.strokeStyle = V("--line"); c.beginPath(); c.moveTo(tx, gy - 8); c.lineTo(tx, gy + gh + 8); c.stroke();
+    c.fillStyle = ink3; c.fillText(hm(t), tx, gy + gh + 34);
+  }
+  c.strokeStyle = ink3; c.globalAlpha = 0.5; c.lineWidth = 2; c.setLineDash([5, 7]); c.beginPath(); c.moveTo(gx, y0); c.lineTo(gx + gw, y0); c.stroke(); c.setLineDash([]); c.globalAlpha = 1;
+  const trace = () => { c.moveTo(X(0), Y(d[0])); for (let i = 1; i <= Math.floor(K); i++) c.lineTo(X(i), Y(d[i])); c.lineTo(hx, hy); };
+  c.fillStyle = color; c.globalAlpha = 0.12; c.beginPath(); trace(); c.lineTo(hx, y0); c.lineTo(gx, y0); c.closePath(); c.fill(); c.globalAlpha = 1;
+  c.strokeStyle = color; c.lineWidth = 5; c.beginPath(); trace(); c.stroke();
+  // the head of the line; once the line is whole it pulses
+  const held = ms - CLIP.lead - CLIP.draw;
+  if (held > 0) { const ph = (held % 1200) / 1200; c.globalAlpha = 0.5 * (1 - ph); c.lineWidth = 3; c.beginPath(); c.arc(hx, hy, 10 + ph * 18, 0, 6.2832); c.stroke(); c.globalAlpha = 1; }
+  c.fillStyle = V("--card"); c.beginPath(); c.arc(hx, hy, 12, 0, 6.2832); c.fill();
+  c.fillStyle = color; c.beginPath(); c.arc(hx, hy, 8, 0, 6.2832); c.fill();
+  // the time the line has reached, above the chart
+  const clock = hm(t0 + p * span); c.font = `600 18px ${F}`;
+  const tw = c.measureText(clock).width + 22, tx = Math.max(gx, Math.min(gx + gw - tw, hx - tw / 2));
+  c.fillStyle = V("--control"); rr(tx, gy - 34, tw, 28, 14); c.fill();
+  c.fillStyle = ink2; c.textAlign = "left"; c.textBaseline = "middle"; c.fillText(clock, tx + 11, gy - 19);
+}
+
+// plays the video on the canvas in a loop; `onEnd` fires when the first pass is complete
+function playClip(r, onEnd) {
+  const my = ++share.run, total = CLIP.lead + CLIP.draw + CLIP.hold, t0 = performance.now();
+  const frame = (now) => {
+    if (share.run !== my) return;
+    const ms = now - t0;
+    if (onEnd && ms >= total) { drawClip(r, total); onEnd(); onEnd = null; }
+    else drawClip(r, onEnd ? ms : ms % total);
+    requestAnimationFrame(frame);
+  };
+  requestAnimationFrame(frame);
+  return my;
+}
+function stopClip() {
+  share.run++;
+  if (share.rec && share.rec.state !== "inactive") share.rec.stop();
+  share.rec = null;
+}
+// the buttons wait while the video is being recorded
+function shareReady(ready) {
+  $("s-x").disabled = $("s-dl").disabled = !ready;
+  $("s-dl").textContent = !ready ? "Recording…" : share.mode === "video" ? "Download video" : "Download PNG";
+}
+const shareNote = (text) => { $("s-note").textContent = text; $("s-note").hidden = !text; };
+function setShareMode(mode) {
+  stopClip();
+  share.mode = mode;
+  shareNote("");
+  for (const b of $("s-mode").querySelectorAll("button")) b.setAttribute("aria-pressed", String(b.dataset.mode === mode));
+  movePill($("s-mode"), '[aria-pressed="true"]');
+  if (mode === "image") {
+    drawCard(me);
+    shareReady(false);
+    return $("cv").toBlob((b) => { share.png = new File([b], `pulse-board-${me.u}.png`, { type: "image/png" }); shareReady(true); }, "image/png");
+  }
+  // the first pass of the loop is recorded straight from the canvas
+  share.video = null;
+  shareReady(false);
+  const rec = (share.rec = new MediaRecorder($("cv").captureStream(30), { mimeType: CLIP_TYPE, videoBitsPerSecond: 8e6 })), parts = [], who = me.u;
+  rec.ondataavailable = (e) => parts.push(e.data);
+  rec.onstop = () => {
+    if (share.run !== my) return; // switched away or closed before it finished
+    const mp4 = CLIP_TYPE.includes("mp4");
+    share.video = new File(parts, `pulse-board-${who}.${mp4 ? "mp4" : "webm"}`, { type: CLIP_TYPE.split(";")[0] });
+    shareReady(true);
+    if (!mp4) shareNote("This browser records WebM, which X doesn't accept. Open the page in Chrome or Safari to get an MP4.");
+  };
+  rec.start();
+  const my = playClip(me, () => rec.stop());
+}
+async function openShare() {
+  if (!me) return;
+  $("share").showModal();
+  $("s-mode").hidden = !CLIP_TYPE || noMotion();
+  share.face = null;
+  setShareMode("image");
+  const who = me.u, [face] = await Promise.all([me.a ? loadImg(avatarUrl(me.a, "400x400")) : null, document.fonts.load(`700 40px "Open Runde"`)]);
+  if (!me || me.u !== who || !$("share").open) return;
+  share.face = face;
+  if (share.mode === "image") setShareMode("image"); // again, now with the picture and the font in
+}
+$("s-mode").onclick = (e) => { const b = e.target.closest("button"); if (b && me && b.dataset.mode !== share.mode) setShareMode(b.dataset.mode); };
+$("s-close").onclick = () => $("share").close();
+$("share").addEventListener("click", (e) => { if (e.target === $("share")) $("share").close(); });
+$("share").addEventListener("close", stopClip);
+
+const shareUrl = () => `${location.origin}${location.pathname}?u=${encodeURIComponent(me.u)}${board === "c" ? "#convictions" : ""}`;
+const shareFile = () => (share.mode === "video" ? share.video : share.png);
+const saveFile = (f) => { const a = document.createElement("a"); a.href = URL.createObjectURL(f); a.download = f.name; a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 1e4); };
+$("s-dl").onclick = () => { if (shareFile()) saveFile(shareFile()); };
+// X's post window can't be handed a file. On a phone the system share sheet can (pick X there); on a computer the image
+// goes to the clipboard and the video to the downloads, one step from the post that opens.
+$("s-x").onclick = async () => {
+  const file = shareFile(), url = shareUrl(), medal = ["🥇", "🥈", "🥉"][me.rank - 1], what = share.mode === "video" ? "Video" : "Image";
+  if (!file) return;
+  const text = `#${me.rank} of ${rows.length} on @xomarket ${BOARDS[board].noun} today${medal ? " " + medal : ""}\n${money(me.pnl)} locked in · ${me.rounds} ${plural(me.rounds)} settled · ${(winRate(me) * 100).toFixed(0)}% won\n\nWhere do you rank? 👇`;
+  if (matchMedia("(pointer: coarse)").matches && navigator.canShare && navigator.canShare({ files: [file] })) {
+    try { await navigator.share({ files: [file], text: `${text}\n${url}` }); } catch {} // the sheet was closed
+    return;
+  }
+  // copy first, while this page still has the focus the clipboard asks for; then open the post
+  const copied = share.mode === "image" && navigator.clipboard && window.ClipboardItem && (await navigator.clipboard.write([new ClipboardItem({ "image/png": file })]).then(() => true, () => false));
+  const tab = window.open(`https://x.com/intent/post?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}`, "_blank");
+  if (!tab) return shareNote("Your browser blocked the new tab. Allow pop-ups for this page and press Post on X again.");
+  tab.opener = null;
+  if (copied) return shareNote("Image copied. Paste it into the post: ⌘V or Ctrl+V.");
+  saveFile(file);
+  shareNote(`${what} saved to your downloads. Drag it into the post.`);
+};
+
+// ---------- data ----------
+async function load() {
+  const local = /^(localhost|127\.0\.0\.1)$/.test(location.hostname);
+  const get = (u) => fetch(u, { cache: "no-store" }).then((r) => { if (!r.ok) throw new Error(r.status); return r.json(); });
+  // on the live site: through /api/data (fresh within seconds), else the raw file (GitHub caches it for 5 minutes)
+  const remote = local ? null : await get("/api/data").catch(() => get(DATA_RAW)).catch(() => null);
+  const bundled = await get(DATA_LOCAL).catch(() => null);
+  const dd = bundled && (!remote || bundled.updatedAt > remote.updatedAt) ? bundled : remote;
+  if (!dd) { if (!days) $("table").innerHTML = `<div class="empty"><b>The board didn't load</b>Refresh in a minute.</div>`; return; }
+  // data older than 15 minutes (it refreshes every ~10): ask the server to start a refresh (GitHub's own schedule is unreliable).
+  // A refresh takes about half a minute, so the first time look again then instead of waiting for the next minute tick.
+  if (!local && Date.now() - dd.updatedAt > 15 * 6e4) {
+    fetch("/api/nudge").catch(() => {});
+    if (!staleSince) { staleSince = Date.now(); setTimeout(load, 35e3); setTimeout(load, 50e3); }
+  } else staleSince = 0;
+  if (RAW && dd.updatedAt <= RAW.updatedAt) { showUpdated(); return; }
+  // the chart eases from the lines it was showing to the new ones, but only within the same day
+  const was = days && days.today === dd.today ? new Map(rows.map((r) => [r.u, dense(r)])) : null;
+  RAW = dd; days = boardData(dd); dayCache.clear();
+  // the page is about today: the race, the podium, the totals and "Find yourself" all read today's ranking
+  rows = dayRows(days.today);
+  byName = new Map(rows.map((r) => [r.u.toLowerCase(), r]));
+  if (was && !noMotion() && !document.hidden) { for (const r of rows) r._from = was.get(r.u) || null; race.morph = performance.now(); }
+  if (period && !days.days.some((x) => x.d === period)) period = null;
+  // the page opens on today's ranking (or the latest day, if nobody has traded yet today); after that the choice is the visitor's
+  if (!periodSet && days.days.length) { period = days.days.some((x) => x.d === days.today) ? days.today : days.days[0].d; periodSet = true; }
+  // a shared link (?u=name) picks that trader once; the address is then cleaned, so a reload starts with nobody picked
+  const u = me ? me.u : searched && $("q").value.trim() ? $("q").value.trim() : new URLSearchParams(location.search).get("u");
+  if (location.search) history.replaceState(null, "", location.pathname + location.hash);
+  if (u) { me = byName.get(u.toLowerCase().replace(/^@/, "")) || null; searched = true; if (!$("q").value) $("q").value = me ? me.u : u; }
+  render();
+  if (race.visible && !race.played) racePlay();
+}
+load();
+setInterval(load, 6e4);
+setInterval(() => { if (days) showUpdated(); }, 3e4);
+</script>
+</body>
+</html>
