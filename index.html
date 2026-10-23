@@ -357,11 +357,13 @@
 
   /* ---------- motion: the page moves with the rounds ---------- */
   :root { --beat: 1.8s; }
-  /* heartbeat: the logo line redraws on every beat, faster as a round runs out */
-  .brand svg { animation: thump var(--beat) ease-in-out infinite; }
-  .brand svg path.ecg { stroke-dasharray: 100; animation: ecg var(--beat) linear infinite; } /* drawn over a faint copy, so the logo is never blank */
-  @keyframes thump { 0%, 24%, 100% { transform: scale(1); } 10% { transform: scale(1.09); } }
-  @keyframes ecg { 0% { stroke-dashoffset: 100; } 42%, 100% { stroke-dashoffset: 0; } }
+  /* the logo's bars play like an equalizer, each to its own rhythm, growing from the bottom */
+  .brand .eq rect { transform-box: fill-box; transform-origin: 50% 100%; animation: eq 1.1s ease-in-out infinite alternate; }
+  .brand .eq rect:nth-child(1) { animation-duration: .9s; animation-delay: -.3s; }
+  .brand .eq rect:nth-child(2) { animation-duration: 1.2s; animation-delay: -.7s; }
+  .brand .eq rect:nth-child(3) { animation-duration: .8s; animation-delay: -.1s; }
+  .brand .eq rect:nth-child(4) { animation-duration: 1.05s; animation-delay: -.5s; }
+  @keyframes eq { 0% { transform: scaleY(1); } 35% { transform: scaleY(.45); } 70% { transform: scaleY(.85); } 100% { transform: scaleY(.35); } }
   /* the last 30 seconds of a round */
   .live.urgent #l-clock { color: var(--neg); animation: tick 1s ease-in-out infinite; transform-origin: right center; }
   @keyframes tick { 0%, 100% { transform: scale(1); } 12% { transform: scale(1.07); } }
@@ -493,7 +495,7 @@
 <header class="bar">
   <div class="wrap">
     <a class="brand" href="./" aria-label="Maco Board home">
-      <svg viewBox="0 0 64 64" aria-hidden="true"><rect width="64" height="64" rx="16" fill="#a293ff"/><path d="M17 44V32M27 44V22M37 44V27M47 44V16" fill="none" stroke="#fff" stroke-width="6" stroke-linecap="round"/></svg>
+      <svg viewBox="0 0 64 64" aria-hidden="true"><rect width="64" height="64" rx="16" fill="#a293ff"/><g class="eq" fill="#fff"><rect x="14" y="29" width="6" height="18" rx="3"/><rect x="24" y="19" width="6" height="28" rx="3"/><rect x="34" y="24" width="6" height="23" rx="3"/><rect x="44" y="13" width="6" height="34" rx="3"/></g></svg>
       <span class="bt">Maco Board</span>
     </a>
     <span class="sp"></span>
