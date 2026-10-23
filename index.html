@@ -961,8 +961,8 @@ function renderYou() {
   if (q && searched) {
     $("you").innerHTML = `<div class="miss">
       <div><b>${esc(q)} isn't on today's board</b>
-      <p>Either no settled Pulse round yet today (the day started at ${dayStartLocal()} your time), or the profile is private (private profiles aren't ranked). One settled round is enough to get on.</p></div>
-      <a class="cta ref" href="${REF}" target="_blank" rel="noopener">Trade a round ↗</a>
+      <p>Either nothing sold or paid out on ${BOARDS[board].noun} yet today (the day started at ${dayStartLocal()} your time), or the profile is private (private profiles aren't ranked). One sale or payout is enough to get on.</p></div>
+      <a class="cta ref" href="${REF}" target="_blank" rel="noopener">Trade on XO ↗</a>
     </div>`;
   } else $("you").innerHTML = "";
 }
