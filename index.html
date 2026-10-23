@@ -125,7 +125,8 @@
   /* ---------- hero ---------- */
   .hero { display: grid; grid-template-columns: minmax(0,1.5fr) minmax(0,1fr); gap: 16px; margin-top: 20px; }
   .lede { font-size: 15px; color: var(--ink-2); max-width: 52ch; }
-  .intro { padding: 24px; display: flex; flex-direction: column; gap: 16px; justify-content: space-between; }
+  .intro { padding: 24px; display: flex; flex-direction: column; gap: 12px; }
+  .intro .today { margin-top: auto; } /* the text sits together at the top, the numbers at the bottom */
   .eyebrow { display: flex; flex-wrap: wrap; gap: 6px; }
   .chip { display: inline-flex; align-items: center; gap: 6px; height: 26px; padding: 0 10px; border-radius: 8px; font-size: 12px; font-weight: 600; background: var(--control); color: var(--ink-2); white-space: nowrap; }
   .chip.up { background: var(--up-soft); color: var(--up-text); }
@@ -521,6 +522,11 @@
           <div class="total"><small>Settled</small><b class="num sk" id="t-rounds">–</b></div>
           <div class="total"><small>Staked</small><b class="num sk" id="t-volume">–</b></div>
         </div>
+        <div class="totals" aria-label="Today at a glance">
+          <div class="total"><small id="t-open-label">Open markets</small><b class="num sk" id="t-open">–</b></div>
+          <div class="total"><small>Won</small><b class="num sk" id="t-won">–</b></div>
+          <div class="total"><small>Best today</small><b class="num sk" id="t-best">–</b></div>
+        </div>
       </div>
     </div>
 
@@ -684,7 +690,7 @@ const lessMotion = matchMedia("(prefers-reduced-motion: reduce)");
 const noMotion = () => lessMotion.matches;
 const fmt = {
   money: (v) => money(v), usd: (v) => money(v, false), int: (v) => Math.round(v).toLocaleString("en-US"),
-  pct1: (v) => v.toFixed(1) + "%", wins: (v) => Math.round(v) + " wins",
+  pct1: (v) => v.toFixed(1) + "%", pct0: (v) => Math.round(v) + "%", wins: (v) => Math.round(v) + " wins",
   price: (v) => "$" + v.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }),
   cents: (v) => (v * 100).toFixed(1).replace(/\.0$/, "") + "¢",
 };
@@ -826,6 +832,13 @@ function render() {
   setNum($("t-traders"), "t-traders", rows.length, "int", true);
   setNum($("t-rounds"), "t-rounds", rows.reduce((sum, r) => sum + r.rounds, 0), "int", true);
   setNum($("t-volume"), "t-volume", rows.reduce((sum, r) => sum + r.vol, 0), "usd", true);
+  // what is still open on XO, the share of today's settled markets that made money, and the day's best result
+  const won = rows.reduce((a, r) => a + r.wins, 0), decided = rows.reduce((a, r) => a + r.wins + r.losses, 0);
+  $("t-open-label").textContent = `Open ${B.noun}`;
+  setNum($("t-open"), "t-open", days.open || 0, "int", true);
+  if (decided) setNum($("t-won"), "t-won", (won / decided) * 100, "pct0", true); else { numStore.delete("t-won"); $("t-won").textContent = "–"; }
+  if (rows.length) { setNum($("t-best"), "t-best", rows[0].pnl, "money", true); $("t-best").className = `num ${cls(rows[0].pnl)}`; }
+  else { numStore.delete("t-best"); $("t-best").textContent = "–"; $("t-best").className = "num"; }
   showUpdated();
 
   // podium: today's top three
@@ -1026,7 +1039,7 @@ let board = location.hash === "#convictions" ? "c" : "m", RAW = null;
 const view = "today", OFF = null, raceComp = () => false; // the Pulse page's competition view isn't part of this one
 function boardData(dd) {
   const b = dd[board] || { days: [], spark: {}, big: [] };
-  return { updatedAt: dd.updatedAt, today: dd.today, users: dd.users, markets: dd.markets || {}, days: b.days, todaySpark: b.spark, big: b.big || [], event: null, hidden: 0 };
+  return { updatedAt: dd.updatedAt, today: dd.today, users: dd.users, markets: dd.markets || {}, days: b.days, todaySpark: b.spark, big: b.big || [], open: b.open, event: null, hidden: 0 };
 }
 function setBoard(b) {
   if (b === board || !BOARDS[b]) return;
