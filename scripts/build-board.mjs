@@ -230,6 +230,7 @@ async function refresh(key) {
     outer: for (let page = 1; page <= 30; page++) {
       const d = await getJSON(`${API}/profiles/${name}/activities?marketScope=${KINDS[k]}&positionType=${type}&sortBy=executedAt&sortOrder=DESC&page=${page}&take=100`, 3);
       if (!d || !d.data) return; // renamed or deleted account
+      if (d.data.length) s.p = 0; // a private profile answers with empty feeds, so any activity means it is public now
       for (const a of d.data) {
         const t = Date.parse(a.date), id = actId(a);
         if (t < from || (t === from && seen.has(id))) break outer;
