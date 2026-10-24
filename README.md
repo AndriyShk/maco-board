@@ -3,7 +3,7 @@
 **Daily profit leaderboard for [XO Market](https://beta.xo.market)'s markets and convictions.**
 Who locked in the most today, who's racing ahead, and where you stand. One board for markets, one for convictions.
 
-**→ [maco-board.vercel.app](https://maco-board.vercel.app)** · convictions: [`/#convictions`](https://maco-board.vercel.app/#convictions)
+**→ [xo-maco-board.vercel.app](https://xo-maco-board.vercel.app)** · convictions: [`/#convictions`](https://xo-maco-board.vercel.app/#convictions)
 
 ## Features
 

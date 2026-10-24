@@ -219,10 +219,17 @@ async function settle(s, key, name, k, id) {
     trade(mk, key);
   }
 }
+async function checkPrivate(s, name) {
+  const p = await getJSON(`${API}/profiles/${name}`);
+  s.pchk = now;
+  s.p = p && p.isPrivate ? 1 : 0;
+  if (s.p) { s.ev = {}; s.chk = {}; s.seen = {}; }
+}
 async function refresh(key) {
   const s = state.users[key];
   const name = encodeURIComponent(s.u);
   const sales = {}, touched = new Set(); // day -> sales read this time; "board:marketId" with something new
+  let listed = 0; // activities the four feeds hold in all (a private profile answers every one of them with none)
   for (const [k, type] of FEEDS) {
     const f = k + type[0]; // mS, mR, cS, cR
     const from = Math.max(start, s.chk[f] || 0), seen = new Set(s.seen[f] || []);
@@ -231,6 +238,7 @@ async function refresh(key) {
       const d = await getJSON(`${API}/profiles/${name}/activities?marketScope=${KINDS[k]}&positionType=${type}&sortBy=executedAt&sortOrder=DESC&page=${page}&take=100`, 3);
       if (!d || !d.data) return; // renamed or deleted account
       if (d.data.length) s.p = 0; // a private profile answers with empty feeds, so any activity means it is public now
+      if (page === 1) listed += (d.meta && d.meta.itemCount) || d.data.length;
       for (const a of d.data) {
         const t = Date.parse(a.date), id = actId(a);
         if (t < from || (t === from && seen.has(id))) break outer;
@@ -244,13 +252,9 @@ async function refresh(key) {
     s.chk[f] = newest; s.seen[f] = keys;
   }
   for (const t of touched) { const [k, id] = t.split(":"); await settle(s, key, name, k, +id); }
-  // a private profile answers with empty feeds: ask once a day whether that's why
-  if (!Object.keys(s.ev).length && now - (s.pchk || 0) > DAY) {
-    const p = await getJSON(`${API}/profiles/${name}`);
-    s.pchk = now;
-    s.p = p && p.isPrivate ? 1 : 0;
-    if (s.p) { s.ev = {}; s.chk = {}; s.seen = {}; }
-  }
+  // empty feeds are how a private profile answers, even for someone with sales on record: ask whether that's why,
+  // and if it is, drop everything kept for them (they come back on their own once the profile is public again)
+  if (!listed && (Object.keys(s.ev).length || now - (s.pchk || 0) > DAY)) await checkPrivate(s, name);
   s.last = now;
 }
 for (const k of Object.keys(state.users)) if (EXCLUDE.has(k)) delete state.users[k];
@@ -281,6 +285,12 @@ await pool(todo, 4, async (k) => {
   }
   if (++done % 200 === 0) { console.log(`…${done} traders`); await write(STATE, state); }
 });
+
+// ---------- 3b. today's traders who may have gone private ----------
+const todayKey = dayKey(now);
+const onToday = Object.entries(state.users).filter(([, s]) => !s.p && !s.bot && now - (s.pchk || 0) > 30 * 6e4 && Object.values(s.ev).some((e) => dayKey(e[0]) === todayKey));
+await pool(onToday, 4, async ([, s]) => { try { await checkPrivate(s, encodeURIComponent(s.u)); } catch (e) { if (!(e instanceof Abort) || /Blocked/.test(e.message)) throw e; } });
+if (onToday.some(([, s]) => s.p)) console.log(`went private: ${onToday.filter(([, s]) => s.p).map(([, s]) => s.u).join(", ")}`);
 
 // ---------- 4. drop what has left the window ----------
 for (const [k, s] of Object.entries(state.users)) {
