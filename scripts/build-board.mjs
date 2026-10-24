@@ -256,6 +256,14 @@ async function refresh(key) {
 for (const k of Object.keys(state.users)) if (EXCLUDE.has(k)) delete state.users[k];
 for (const k of Object.keys(state.users)) if (state.users[k].bot) dirty.delete(k);
 const all = Object.keys(state.users).filter((k) => !state.users[k].bot);
+// a private profile can be made public at any time: ask every run (one request each) and read it at once when it is
+await pool(all.filter((k) => state.users[k].p), 4, async (k) => {
+  const s = state.users[k];
+  let p;
+  try { p = await getJSON(`${API}/profiles/${encodeURIComponent(s.u)}`, 2); } catch (e) { if (/Blocked/.test(e.message)) throw e; return; }
+  s.pchk = now;
+  if (p && !p.isPrivate) { s.p = 0; dirty.add(k); }
+});
 const sweep = all.filter((k) => !dirty.has(k) && (process.env.ALL || now - state.users[k].last >= SWEEP_EVERY)).sort((a, b) => state.users[a].last - state.users[b].last).slice(0, FULL || process.env.ALL ? Infinity : SWEEP_MAX);
 const todo = [...new Set([
   ...dirty,
