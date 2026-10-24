@@ -1063,13 +1063,12 @@ function setBoard(b) {
 }
 $("views").addEventListener("click", (e) => { const x = e.target.closest("[data-board]"); if (x) setBoard(x.dataset.board); });
 for (const x of $("views").querySelectorAll("[data-board]")) x.setAttribute("aria-pressed", String(x.dataset.board === board)); // a #convictions link opens that board
-const marketUrl = (m) => `https://beta.xo.market/event/${encodeURIComponent(m[1])}?r=andriy_shkinder`;
 function renderWins() {
   const list = (days.big || []).filter((x) => x[2] > 0);
   $("wins-note").textContent = `since ${dayStartLocal()}`;
   $("wins-list").innerHTML = list.length ? list.slice(0, 5).map(([u, id, pnl]) => {
     const m = days.markets[id] || ["A market", "", ""], [a, v, c] = days.users[u] || ["", 0, ""];
-    return `<a class="win" href="${m[1] ? marketUrl(m) : REF}" target="_blank" rel="noopener">
+    return `<a class="win" href="${REF}" target="_blank" rel="noopener">
       ${m[2] ? `<img class="pic" src="${esc(m[2])}" alt="" loading="lazy" referrerpolicy="no-referrer">` : `<span class="pic"></span>`}
       <span style="min-width:0"><span class="t">${esc(m[0])}</span><span class="by">${avatar({ u, a, v, c }, "sm")}<span>${esc(u)}</span>${v ? VER : ""}</span></span>
       <b class="p num pos">${money(pnl)}</b></a>`;
