@@ -205,6 +205,7 @@ async function settle(s, key, name, k, id) {
   }
   for (const [eid, e] of Object.entries(s.ev)) if (e[2] === id && e[1] === k) delete s.ev[eid]; // worked out again from scratch
   const held = {}; // outcome -> { q: shares, c: cost }
+  const twins = {}; // id -> how many times it has come up: a trade split into equal fills gives identical rows, each one counts
   for (const a of hist.reverse()) { // oldest first
     const x = (a.description || "").match(TRADE);
     if (!x) continue;
@@ -213,7 +214,8 @@ async function settle(s, key, name, k, id) {
     const avg = p.q > 1e-9 ? p.c / p.q : Number(a.avgEntryPrice || 0) / 1e6, t = Date.parse(a.date);
     p.c -= Math.min(sh, p.q) * avg; p.q -= sh;
     if (p.q < 1e-6) { p.q = 0; p.c = 0; }
-    if (t >= start && sh > 0) s.ev[actId(a)] = [t, k, id, r4(sh * (px - avg)), r4(sh * avg)];
+    const aid = actId(a), nth = (twins[aid] = (twins[aid] || 0) + 1);
+    if (t >= start && sh > 0) s.ev[nth > 1 ? `${aid}#${nth}` : aid] = [t, k, id, r4(sh * (px - avg)), r4(sh * avg)];
     const mk = (state.markets[id] ??= { k, t: "", s: "", i: "", st: "CLOSED", v: -1, seen: 0, tr: [] });
     if (!mk.t) { mk.t = a.marketTitle || ""; mk.s = a.slug || ""; mk.i = a.picture || ""; }
     trade(mk, key);
