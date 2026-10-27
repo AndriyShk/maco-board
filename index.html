@@ -483,6 +483,9 @@
   .win .by span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .win .p { font-weight: 700; font-size: 15px; }
   .wins-empty { color: var(--ink-3); font-size: 13px; padding: 18px 4px; }
+  /* the emoji in front of a page title: tilted, with a slow nod */
+  .h-emoji { display: inline-block; margin-right: .2em; transform: rotate(-10deg); transform-origin: 50% 85%; animation: h-emoji 3.4s ease-in-out infinite; }
+  @keyframes h-emoji { 0%, 100% { transform: rotate(-10deg) translateY(0); } 50% { transform: rotate(6deg) translateY(-3px); } }
 </style>
 <script>
   // Vercel Web Analytics: page views only, no cookies. Skipped on localhost, where /_vercel/insights doesn't exist.
@@ -517,7 +520,7 @@
       <div class="eyebrow">
         <span class="chip" id="b-chip">XO Markets</span>
       </div>
-      <h1 id="b-title">Who's <em>up</em> on markets?</h1>
+      <h1 id="b-title"><span class="h-emoji" aria-hidden="true">📊</span>Who's <em>up</em> on markets?</h1>
       <p class="lede" id="b-lede"></p>
       <div class="today">
         <div class="today-head"><b>Today so far</b><small id="totals-note"></small></div>
@@ -826,7 +829,7 @@ function render() {
   if (!days) return;
   const B = BOARDS[board];
   $("b-chip").textContent = B.chip;
-  $("b-title").innerHTML = `Who's <em>up</em> on ${B.noun}?`;
+  $("b-title").innerHTML = `<span class="h-emoji" aria-hidden="true">${B.emoji}</span>Who's <em>up</em> on ${B.noun}?`;
   $("b-lede").textContent = B.lede;
   $("how-day").textContent = `A day on this board runs from ${dayStartLocal()} to ${dayStartLocal()} your time (00:00 to 24:00 UTC); today's numbers keep updating until it ends.`;
   renderWins();
@@ -1036,8 +1039,8 @@ document.addEventListener("keydown", (e) => { if (e.key === "Enter" && e.target.
 // ---------- boards ----------
 // The data file holds both boards; `days` is the open one, in the shape the rest of this page reads.
 const BOARDS = {
-  m: { chip: "XO Markets", noun: "markets", word: "Markets", lede: "Every day on XO Market's prediction markets: who locked in the most profit, who's racing ahead, and where you stand. Past days are in the leaderboard." },
-  c: { chip: "XO Convictions", noun: "convictions", word: "Convictions", lede: "Every day on XO Market's convictions: who locked in the most profit, who's racing ahead, and where you stand. Past days are in the leaderboard." },
+  m: { emoji: "📊", chip: "XO Markets", noun: "markets", word: "Markets", lede: "Every day on XO Market's prediction markets: who locked in the most profit, who's racing ahead, and where you stand. Past days are in the leaderboard." },
+  c: { emoji: "👫", chip: "XO Convictions", noun: "convictions", word: "Convictions", lede: "Every day on XO Market's convictions: who locked in the most profit, who's racing ahead, and where you stand. Past days are in the leaderboard." },
 };
 let board = location.hash === "#convictions" ? "c" : "m", RAW = null;
 const view = "today", OFF = null, raceComp = () => false; // the Pulse page's competition view isn't part of this one
