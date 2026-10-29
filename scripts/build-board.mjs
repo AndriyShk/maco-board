@@ -238,7 +238,10 @@ async function refresh(key) {
     let newest = s.chk[f] || 0, keys = [...seen];
     outer: for (let page = 1; page <= 30; page++) {
       const d = await getJSON(`${API}/profiles/${name}/activities?marketScope=${KINDS[k]}&positionType=${type}&sortBy=executedAt&sortOrder=DESC&page=${page}&take=100`, 3);
-      if (!d || !d.data) return; // renamed or deleted account
+      // renamed or deleted: the name is gone (a rename comes back under the new name), so what was kept for it goes too,
+      // or the same sales would be ranked twice; a 404 that was only a hiccup heals, as the next read starts over
+      if (!d) { s.ev = {}; s.chk = {}; s.seen = {}; s.last = now; return; }
+      if (!d.data) return;
       if (d.data.length) s.p = 0; // a private profile answers with empty feeds, so any activity means it is public now
       if (page === 1) listed += (d.meta && d.meta.itemCount) || d.data.length;
       for (const a of d.data) {
