@@ -104,7 +104,6 @@
   /* the contest's rules, from XO */
   .rules-card { margin-top: 16px; padding: 16px 20px; }
   .rules-card h2 { font-size: 15px; font-weight: 600; margin-bottom: 10px; }
-  .rules-card h2 small { font-size: 12px; font-weight: 500; color: var(--ink-3); margin-left: 4px; }
   .rules { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); border: 1px solid var(--line); border-radius: 12px; overflow: hidden; }
   .rules > div { padding: 10px 14px; min-width: 0; }
   .rules > div + div { border-left: 1px solid var(--line); }
@@ -114,13 +113,6 @@
   .rules b { display: block; font-size: 14px; font-weight: 600; margin-top: 2px; }
   @media (max-width: 860px) { .rules { grid-template-columns: 1fr 1fr; } .rules > div:nth-child(even) { border-left: 1px solid var(--line); } .rules > div:nth-child(odd) { border-left: 0; } .rules > div:nth-child(n+3) { border-top: 1px solid var(--line); } }
   .c-podium .pod { cursor: default; }
-  /* the prize list, under the rules */
-  .bands { display: flex; flex-direction: column; }
-  .band { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 10px 0; font-size: 14px; }
-  .band + .band { border-top: 1px solid var(--line); }
-  .band b { font-weight: 600; }
-  .band .amts { text-align: right; }
-  .band small { color: var(--ink-3); font-size: 12px; }
   @media (max-width: 560px) { /* phones: the dates and the countdown side by side, the prizes on their own row */
     .facts { grid-template-columns: 1fr 1fr; }
     .facts .fact b { font-size: 15px; }
@@ -607,11 +599,6 @@
   <section class="card rules-card v-comp" id="c-rules" hidden>
     <h2>Rules</h2>
     <div class="rules" id="c-rules-grid"></div>
-  </section>
-
-  <section class="card rules-card v-comp" id="c-prizes-card" hidden>
-    <h2>Prizes <small id="c-bands-note"></small></h2>
-    <div class="bands" id="c-bands"></div>
   </section>
 
   <section class="card race" id="race">
@@ -1223,8 +1210,7 @@ const amt = (k, text) => `<span class="amt">${coin(k)}${text}</span>`;
 const prizeOf = (b) => `${amt("usdc", b.usdc.toLocaleString("en-US") + " USDC")}${amt("cp", b.cp.toLocaleString("en-US") + " CP")}`;
 const prizeFor = (rank) => { const b = (offDetail().prizeBands || []).find((x) => rank >= x.rankFrom && rank <= x.rankTo); return b ? prizeOf(b) : ""; };
 const paidPlaces = () => Math.max(...(offDetail().prizeBands || []).map((b) => b.rankTo), 0);
-const brief = (n) => (n >= 1000 ? +(n / 1000).toPrecision(2) + "K" : String(n)); // 33333 -> 33K, 3333 -> 3.3K: the exact prizes are in the list
-const nth = (n) => n + (n % 100 >= 11 && n % 100 <= 13 ? "th" : { 1: "st", 2: "nd", 3: "rd" }[n % 10] || "th");
+const brief = (n) => (n >= 1000 ? +(n / 1000).toPrecision(2) + "K" : String(n)); // 33333 -> 33K, 3333 -> 3.3K: the exact prizes are beside the traders
 // the tag beside a name on the chart. tone: "ok" in the prizes, "near" ranked outside them, "need" joined without the volume
 function offStatus(u) {
   const all = offRows(), r = all.find((x) => x.u.toLowerCase() === u.toLowerCase());
@@ -1303,8 +1289,6 @@ function renderComp() {
   $("c-volume").textContent = money(off.reduce((sum, r) => sum + r.vol, 0), false);
   $("c-totals-title").textContent = ph === "after" ? "Final totals" : "Contest so far";
   $("c-totals-note").textContent = ph === "live" ? "XO's official board · live" : "";
-  $("c-bands-note").textContent = paid ? `top ${paid}` : "";
-  $("c-bands").innerHTML = (det.prizeBands || []).map((b) => `<div class="band"><b>${b.rankFrom === b.rankTo ? nth(b.rankFrom) : `${nth(b.rankFrom)}–${nth(b.rankTo)}`}${b.rankFrom === b.rankTo ? "" : " <small>each</small>"}</b><span class="amts num">${prizeOf(b)}</span></div>`).join("");
   const rules = [
     ["Entry", `Free${det.eligibility && det.eligibility.requireX ? " · X account required" : ""}`],
     ["Ranked by", "Trading volume"],
