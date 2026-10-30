@@ -1271,7 +1271,7 @@ function renderComp() {
   const paid = paidPlaces(), minVol = det.minQualifyingVolumeUsdc, minFill = det.minTradeUsdc;
   const range = `${fmtUTC(ev.start)} – ${fmtUTC(ev.end)}`, scope = det.scopeLabel || "Contest", noun = scope.toLowerCase();
   const off = offRows(), ranked = off.filter((r) => r.qualified), waiting = off.filter((r) => !r.qualified);
-  $("c-scope").textContent = `⚽ ${scope} · volume`;
+  $("c-scope").textContent = `⚽ ${scope}`;
   $("c-phase").textContent = { before: "Starts soon", live: "Live", after: "Final" }[ph];
   $("c-phase").className = "chip " + (ph === "after" ? "down" : "up");
   $("c-title").innerHTML = '<span class="h-emoji" aria-hidden="true">⚽</span>' + esc(ev.name).replace(/(\S+)$/, "<em>$1</em>");
