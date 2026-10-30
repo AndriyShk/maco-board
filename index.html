@@ -488,7 +488,7 @@
   .wins-head { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; }
   .wins-head b { font-size: 16px; font-weight: 600; }
   .wins-head small { color: var(--ink-3); font-size: 12px; }
-  .wins-list { display: flex; flex-direction: column; gap: 6px; }
+  .wins-list { position: relative; display: flex; flex-direction: column; gap: 6px; overflow-y: auto; overscroll-behavior: contain; scrollbar-width: thin; }
   .win { display: grid; grid-template-columns: 40px minmax(0,1fr) auto; gap: 10px; align-items: center; padding: 8px; border-radius: 12px; color: inherit; text-decoration: none; transition: background .15s; }
   .win:hover { background: var(--control); }
   .win .pic { width: 40px; height: 40px; border-radius: 10px; object-fit: cover; background: var(--control); }
@@ -1137,6 +1137,7 @@ function boardData(dd) {
 function setBoard(b) {
   if (b === board || !BOARDS[b]) return;
   board = b; view = b === "f" ? "comp" : "today"; compCache = null; race.played = false;
+  $("wins-list").scrollTop = 0;
   showView();
   history.replaceState(null, "", location.pathname + location.search + (HASHES[b] || ""));
   for (const x of $("views").querySelectorAll("[data-board]")) x.setAttribute("aria-pressed", String(x.dataset.board === b));
@@ -1332,14 +1333,24 @@ document.addEventListener("click", (e) => { if (e.target.closest("#c-more")) { c
 function renderWins() {
   const list = (days.big || []).filter((x) => x[2] > 0);
   $("wins-note").textContent = `since ${dayStartLocal()}`;
-  $("wins-list").innerHTML = list.length ? list.slice(0, 5).map(([u, id, pnl]) => {
+  const at = $("wins-list").scrollTop; // re-rendering must not jump the list back to the top
+  $("wins-list").innerHTML = list.length ? list.map(([u, id, pnl]) => {
     const m = days.markets[id] || ["A market", "", ""], [a, v, c] = days.users[u] || ["", 0, ""];
     return `<a class="win" href="${REF}" target="_blank" rel="noopener">
       ${m[2] ? `<img class="pic" src="${esc(m[2])}" alt="" loading="lazy" referrerpolicy="no-referrer">` : `<span class="pic"></span>`}
       <span style="min-width:0"><span class="t">${esc(m[0])}</span><span class="by">${avatar({ u, a, v, c }, "sm")}<span>${esc(u)}</span>${v ? VER : ""}</span></span>
       <b class="p num pos">${money(pnl)}</b></a>`;
   }).join("") : `<div class="wins-empty">No winning ${BOARDS[board].noun} settled yet today.</div>`;
+  sizeWins();
+  $("wins-list").scrollTop = at;
 }
+// four rows show, the rest scroll. Measured, because a long title makes its row taller
+function sizeWins() {
+  const box = $("wins-list"), last = box.children[3];
+  box.style.maxHeight = box.children.length > 4 && last.offsetHeight ? `${last.offsetTop + last.offsetHeight}px` : "";
+}
+addEventListener("resize", sizeWins);
+document.fonts.ready.then(sizeWins);
 
 // ---------- race chart ----------
 // Canvas line race in the spirit of the Pulse chart: one line per trader, a dashed break-even line where Pulse has

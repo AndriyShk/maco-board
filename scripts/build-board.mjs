@@ -357,7 +357,7 @@ for (const k of ["m", "c"]) {
   out[k] = {
     days: shown.map((d) => ({ d, rows: state.days[d][k] || [] })).filter((x) => x.rows.length || x.d === today),
     spark,
-    big: big.slice(0, 6), // today's biggest single wins: [username, marketId, pnl, when]
+    big: big.filter((b) => b[2] > 0).slice(0, 30), // today's biggest single wins: [username, marketId, pnl, when]
     open: [...listed.values()].filter((m) => m.k === k && m.status === "ACTIVE").length,
   };
   for (const x of out[k].days) for (const r of x.rows) { names.add(r[0]); marketsShown.add(r[7]); }
