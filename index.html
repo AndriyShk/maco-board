@@ -69,8 +69,7 @@
   .views button { position: relative; z-index: 1; height: 30px; padding: 0 12px; font-size: 13px; }
   /* phones: a tighter bar so the name still fits beside the switch; only the narrowest screens drop it */
   @media (max-width: 440px) { .bar .wrap { gap: 8px; } .brand { gap: 7px; font-size: 15.5px; } .brand svg { width: 24px; height: 24px; } .views button { padding: 0 9px; font-size: 12.5px; } }
-  .views .short { display: none; }
-  @media (max-width: 520px) { .views .v-emoji, .views .long { display: none; } .views .short { display: inline; } } /* three boards: shorter names, and below 440px the logo alone */
+  @media (max-width: 520px) { .views .v-emoji { display: none; } } /* three boards: no emoji, and below 440px the logo alone */
   @media (max-width: 440px) { .brand .bt { display: none; } }
   @media (max-width: 345px) { .brand .bt { display: none; } }
   button.chip { border: 0; cursor: pointer; font: inherit; font-size: 12px; font-weight: 600; }
@@ -521,7 +520,7 @@
     <span class="sp"></span>
     <!-- one page: XO's markets, its convictions, and the contest while one is set (config.json "contest") -->
     <div class="seg views" id="views" role="group" aria-label="Board">
-      <button data-board="m" aria-pressed="true"><span class="v-emoji" aria-hidden="true">📊 </span>Markets</button><button data-board="c" aria-pressed="false"><span class="v-emoji" aria-hidden="true">👫 </span>Convictions</button><button data-board="f" aria-pressed="false" id="comp-tab" hidden><span class="v-emoji" aria-hidden="true">⚽ </span><span class="long">Competition</span><span class="short">Contest</span></button>
+      <button data-board="m" aria-pressed="true"><span class="v-emoji" aria-hidden="true">📊 </span>Markets</button><button data-board="c" aria-pressed="false"><span class="v-emoji" aria-hidden="true">👫 </span>Convictions</button><button data-board="f" aria-pressed="false" id="comp-tab" hidden><span class="v-emoji" aria-hidden="true">⚽ </span>Contest</button>
     </div>
     <button class="icon-btn" id="theme" aria-label="Switch light / dark theme">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5Z"/></svg>
@@ -541,12 +540,12 @@
         <div class="today-head"><b>Today so far</b><small id="totals-note"></small></div>
         <div class="totals" aria-label="Today's totals">
           <div class="total"><small>Traders</small><b class="num sk" id="t-traders">–</b></div>
-          <div class="total"><small>Settled</small><b class="num sk" id="t-rounds">–</b></div>
-          <div class="total"><small>Staked</small><b class="num sk" id="t-volume">–</b></div>
+          <div class="total"><small>Positions settled</small><b class="num sk" id="t-rounds">–</b></div>
+          <div class="total"><small>Staked on them</small><b class="num sk" id="t-volume">–</b></div>
         </div>
         <div class="totals" aria-label="Today at a glance">
-          <div class="total"><small id="t-open-label">Open markets</small><b class="num sk" id="t-open">–</b></div>
-          <div class="total"><small>Won</small><b class="num sk" id="t-won">–</b></div>
+          <div class="total"><small>Positions won</small><b class="num sk" id="t-won">–</b></div>
+          <div class="total"><small>Net PnL</small><b class="num sk" id="t-net">–</b></div>
           <div class="total"><small>Best today</small><b class="num sk" id="t-best">–</b></div>
         </div>
       </div>
@@ -667,6 +666,7 @@
       <li>Profit counts on the day it is locked in, the way XO's Net PnL does: when shares are sold, or when a resolved market pays out. Open positions don't count until then.</li>
       <li>Each sale or payout is worth its shares × (price − your average entry price), from your public XO activity, the same figure the app shows. Fees are left out.</li>
       <li>Markets and convictions are two separate boards; Pulse rounds have <a href="https://xo-pulse-board.vercel.app" target="_blank" rel="noopener">their own</a>.</li>
+      <li>Today's totals count positions settled today, even if they were opened earlier: Staked on them is what those shares cost, whenever they were bought. One market settled by two traders is two positions.</li>
       <li id="how-day">A day on this board runs from 00:00 to 24:00 UTC; today's numbers keep updating until it ends.</li>
       <li id="how-window">Everything on this page is today's, unless you pick another day in the leaderboard.</li>
       <li>Private profiles aren't ranked. Make your profile public in XO settings to appear.</li>
@@ -905,7 +905,7 @@ function render() {
   $("race-title").textContent = "Today's race";
   $("race-sub").textContent = "Profit the leaders locked in today, sale by sale and payout by payout. Drag across the chart to rewind.";
   const B = BOARDS[board];
-  $("b-chip").textContent = B.chip;
+  $("b-chip").textContent = `${B.chip} · ${(days.open || 0).toLocaleString("en-US")} open`; // open right now, so not among today's totals
   $("b-title").innerHTML = `<span class="h-emoji" aria-hidden="true">${B.emoji}</span>Who's <em>up</em> on ${B.noun}?`;
   $("b-lede").textContent = B.lede;
   $("how-day").textContent = `A day on this board runs from ${dayStartLocal()} to ${dayStartLocal()} your time (00:00 to 24:00 UTC); today's numbers keep updating until it ends.`;
@@ -916,11 +916,11 @@ function render() {
   setNum($("t-traders"), "t-traders", rows.length, "int", true);
   setNum($("t-rounds"), "t-rounds", rows.reduce((sum, r) => sum + r.rounds, 0), "int", true);
   setNum($("t-volume"), "t-volume", rows.reduce((sum, r) => sum + r.vol, 0), "usd", true);
-  // what is still open on XO, the share of today's settled markets that made money, and the day's best result
+  // the share of today's settled positions that made money, everyone's PnL together, and the day's best result
   const won = rows.reduce((a, r) => a + r.wins, 0), decided = rows.reduce((a, r) => a + r.wins + r.losses, 0);
-  $("t-open-label").textContent = `Open ${B.noun}`;
-  setNum($("t-open"), "t-open", days.open || 0, "int", true);
   if (decided) setNum($("t-won"), "t-won", (won / decided) * 100, "pct0", true); else { numStore.delete("t-won"); $("t-won").textContent = "–"; }
+  const net = rows.reduce((a, r) => a + r.pnl, 0);
+  setNum($("t-net"), "t-net", net, "money", true); $("t-net").className = `num ${cls(net)}`;
   if (rows.length) { setNum($("t-best"), "t-best", rows[0].pnl, "money", true); $("t-best").className = `num ${cls(rows[0].pnl)}`; }
   else { numStore.delete("t-best"); $("t-best").textContent = "–"; $("t-best").className = "num"; }
   showUpdated();
