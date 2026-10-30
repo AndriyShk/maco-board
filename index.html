@@ -69,7 +69,9 @@
   .views button { position: relative; z-index: 1; height: 30px; padding: 0 12px; font-size: 13px; }
   /* phones: a tighter bar so the name still fits beside the switch; only the narrowest screens drop it */
   @media (max-width: 440px) { .bar .wrap { gap: 8px; } .brand { gap: 7px; font-size: 15.5px; } .brand svg { width: 24px; height: 24px; } .views button { padding: 0 9px; font-size: 12.5px; } }
-  @media (max-width: 410px) { .views .v-emoji { display: none; } } /* the board names are longer than Pulse's: below this the logo text would wrap */
+  .views .short { display: none; }
+  @media (max-width: 520px) { .views .v-emoji, .views .long { display: none; } .views .short { display: inline; } } /* three boards: shorter names, and below 440px the logo alone */
+  @media (max-width: 440px) { .brand .bt { display: none; } }
   @media (max-width: 345px) { .brand .bt { display: none; } }
   button.chip { border: 0; cursor: pointer; font: inherit; font-size: 12px; font-weight: 600; }
   button.chip:hover { filter: brightness(.96); }
@@ -91,23 +93,36 @@
   .nudge p { font-size: 13px; color: var(--ink-2); line-height: 1.45; }
   .nudge-link { font-weight: 700; white-space: nowrap; color: var(--up-text); text-decoration: none; }
   .nudge-link:hover { text-decoration: underline; }
-  @media (min-width: 861px) {
-    :root[data-view="comp"] .hero { grid-template-rows: auto 1fr; }
-    :root[data-view="comp"] .hero > .intro.v-comp { grid-row: 1 / span 2; }
-    :root[data-view="comp"] .hero > .nudge { grid-column: 2; }
-  }
-  /* in the competition view the round card keeps its own height instead of matching the contest card */
-  :root[data-view="comp"] .live { align-self: start; justify-content: flex-start; gap: 18px; }
   /* the contest's rules, from XO */
   .rules-card { margin-top: 16px; padding: 16px 20px; }
   .rules-card h2 { font-size: 15px; font-weight: 600; margin-bottom: 10px; }
-  .rules { display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); border: 1px solid var(--line); border-radius: 12px; overflow: hidden; }
+  .rules { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); border: 1px solid var(--line); border-radius: 12px; overflow: hidden; }
   .rules > div { padding: 10px 14px; min-width: 0; }
   .rules > div + div { border-left: 1px solid var(--line); }
+  .rules > div:nth-child(3n+1) { border-left: 0; }
+  .rules > div:nth-child(n+4) { border-top: 1px solid var(--line); }
   .rules small { display: block; font-size: 11px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--ink-3); }
   .rules b { display: block; font-size: 14px; font-weight: 600; margin-top: 2px; }
-  @media (max-width: 860px) { .rules { grid-template-columns: 1fr 1fr; } .rules > div:nth-child(odd) { border-left: 0; } .rules > div:nth-child(n+3) { border-top: 1px solid var(--line); } }
+  @media (max-width: 860px) { .rules { grid-template-columns: 1fr 1fr; } .rules > div:nth-child(even) { border-left: 1px solid var(--line); } .rules > div:nth-child(odd) { border-left: 0; } .rules > div:nth-child(n+3) { border-top: 1px solid var(--line); } }
   .c-podium .pod { cursor: default; }
+  /* the prize list beside the contest card */
+  .bands { display: flex; flex-direction: column; flex: 1; }
+  .band { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 10px 0; font-size: 14px; }
+  .band + .band { border-top: 1px solid var(--line); }
+  .band b { font-weight: 600; }
+  .band .amts { text-align: right; }
+  .band small { color: var(--ink-3); font-size: 12px; }
+  @media (max-width: 560px) { /* phones: the dates and the countdown side by side, the prizes on their own row */
+    .facts { grid-template-columns: 1fr 1fr; }
+    .facts .fact b { font-size: 15px; }
+    .facts .fact:nth-child(2) { grid-column: 1 / -1; order: 3; border-left: 0; border-top: 1px solid var(--line); }
+    .facts .fact:nth-child(3) { border-left: 1px solid var(--line); }
+  }
+  .band-note { font-size: 13px; color: var(--ink-2); line-height: 1.45; }
+  .coin { width: 1.1em; height: 1.1em; vertical-align: -.2em; margin-right: .3em; flex: none; }
+  .amt { white-space: nowrap; }
+  .amt + .amt { margin-left: .6em; }
+  #c-prizes .amt + .amt { margin-left: 0; } /* there a plus sits between them */
   .place.p1 { background: #C7B583; color: #3A331F; box-shadow: inset 0 0 0 1.5px #867852; }
   .place.p2 { background: #B7BABE; color: #2C2E30; box-shadow: inset 0 0 0 1.5px #75787C; }
   .place.p3 { background: #B4967D; color: #3A2E22; box-shadow: inset 0 0 0 1.5px #6E5A49; }
@@ -136,7 +151,7 @@
   .chip .btc { width: 14px; height: 14px; border-radius: 4px; background: #f7931a; color: #fff; font-size: 10px; display: grid; place-items: center; font-weight: 700; }
   h1 { font-size: clamp(28px, 4.2vw, 40px); line-height: 1.08; font-weight: 700; letter-spacing: -.02em; text-wrap: balance; }
   h1 em { font-style: normal; color: var(--up-text); }
-  .facts { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); border: 1px solid var(--line); border-radius: 12px; }
+  .facts { display: grid; grid-template-columns: minmax(0,1fr) minmax(0,1.5fr) minmax(0,1fr); /* the prizes get the most room */ border: 1px solid var(--line); border-radius: 12px; }
   .today { display: flex; flex-direction: column; gap: 8px; }
   .today-head { display: flex; align-items: baseline; gap: 8px; }
   .today-head b { font-size: 14px; font-weight: 600; }
@@ -504,9 +519,9 @@
       <span class="bt">Maco Board</span>
     </a>
     <span class="sp"></span>
-    <!-- two boards, one page: XO's markets and its convictions -->
+    <!-- one page: XO's markets, its convictions, and the contest while one is set (config.json "contest") -->
     <div class="seg views" id="views" role="group" aria-label="Board">
-      <button data-board="m" aria-pressed="true"><span class="v-emoji" aria-hidden="true">📊 </span>Markets</button><button data-board="c" aria-pressed="false"><span class="v-emoji" aria-hidden="true">👫 </span>Convictions</button>
+      <button data-board="m" aria-pressed="true"><span class="v-emoji" aria-hidden="true">📊 </span>Markets</button><button data-board="c" aria-pressed="false"><span class="v-emoji" aria-hidden="true">👫 </span>Convictions</button><button data-board="f" aria-pressed="false" id="comp-tab" hidden><span class="v-emoji" aria-hidden="true">⚽ </span><span class="long">Competition</span><span class="short">Contest</span></button>
     </div>
     <button class="icon-btn" id="theme" aria-label="Switch light / dark theme">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5Z"/></svg>
@@ -537,10 +552,47 @@
       </div>
     </div>
 
-    <div class="card wins">
+    <div class="card wins v-today">
       <div class="wins-head"><b>Biggest wins today</b><small id="wins-note"></small></div>
       <div class="wins-list" id="wins-list"><div class="sk-row"></div><div class="sk-row"></div><div class="sk-row"></div></div>
     </div>
+
+    <div class="card intro v-comp" hidden>
+      <div class="eyebrow">
+        <span class="chip" id="c-scope"></span>
+        <span class="chip up" id="c-phase"></span>
+      </div>
+      <h1 id="c-title"></h1>
+      <p class="lede" id="c-lede"></p>
+      <div class="facts">
+        <div class="fact"><small>Dates (UTC)</small><b id="c-dates"></b></div>
+        <div class="fact"><small>Prizes</small><b id="c-prizes"></b></div>
+        <div class="fact"><small id="c-left-label">Starts in</small><b class="num" id="c-left"></b></div>
+      </div>
+      <div class="meter c-meter" id="c-meter-box"><i id="c-meter"></i></div>
+      <div class="today">
+        <div class="today-head"><b id="c-totals-title">Contest so far</b><small id="c-totals-note"></small></div>
+        <div class="totals" aria-label="Contest totals">
+          <div class="total"><small>Joined</small><b class="num" id="c-traders">–</b></div>
+          <div class="total"><small>Ranked</small><b class="num" id="c-ranked">–</b></div>
+          <div class="total"><small>Volume</small><b class="num" id="c-volume">–</b></div>
+        </div>
+      </div>
+      <div class="c-cta" id="c-cta">
+        <a class="c-btn" id="c-join" target="_blank" rel="noopener">Join the contest on XO<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17 17 7M9 7h8v8"/></svg></a>
+      </div>
+    </div>
+
+    <div class="card wins v-comp" hidden>
+      <div class="wins-head"><b>Prizes</b><small id="c-bands-note"></small></div>
+      <div class="bands" id="c-bands"></div>
+      <p class="band-note" id="c-join-note">Only trades after you join count. <a class="nudge-link" id="c-note-join" target="_blank" rel="noopener">Join on XO ↗</a></p>
+    </div>
+  </section>
+
+  <section class="card rules-card v-comp" id="c-rules" hidden>
+    <h2>Rules</h2>
+    <div class="rules" id="c-rules-grid"></div>
   </section>
 
   <section class="card race" id="race">
@@ -560,11 +612,10 @@
       </div>
     </div>
     <div class="race-box sk-box"><canvas id="race-cv" role="img" aria-label="Line chart of the leaders' cumulative PnL through today"></canvas></div>
-    <div class="race-legend"><span><i class="dash"></i>$0 line</span>
+    <div class="race-legend"><span class="v-today"><i class="dash"></i>$0 line</span>
       <span class="v-comp tagkey" hidden><b class="tk ok">In the prizes</b></span>
-      <span class="v-comp tagkey" hidden><b class="tk near">Behind 10th</b></span>
-      <span class="v-comp tagkey" hidden><b class="tk need">More volume to qualify</b></span>
-      <span class="v-comp tagkey" hidden><b class="tk out">Not ranked on XO yet</b></span></div>
+      <span class="v-comp tagkey" hidden><b class="tk near">Volume to reach the prizes</b></span>
+      <span class="v-comp tagkey" hidden><b class="tk need">Volume to qualify</b></span></div>
   </section>
 
   <section class="card find v-today" id="find">
@@ -594,6 +645,21 @@
     <div id="table"><div class="sk-row"></div><div class="sk-row"></div><div class="sk-row"></div><div class="sk-row"></div><div class="sk-row"></div></div>
   </section>
 
+
+  <div class="sec-title v-comp" hidden><h2 id="c-pod-title">Top 3</h2><small id="c-pod-note"></small></div>
+  <section class="podium v-comp c-podium" id="c-podium" aria-label="Contest top three" hidden></section>
+  <section class="card board v-comp" id="competition" hidden>
+    <div class="board-head">
+      <h2 id="c-board-title">Contest leaderboard</h2>
+      <small id="c-period"></small>
+      <span class="upd" id="c-upd"></span>
+    </div>
+    <div id="c-table"></div>
+  </section>
+  <section class="card how v-comp" hidden>
+    <h2>How the contest is counted</h2>
+    <ul id="c-how"></ul>
+  </section>
 
   <section class="card how v-today">
     <h2>How this is counted</h2>
@@ -827,6 +893,17 @@ const sorted = (t) => dayRows(period).filter(t.keep || (() => true)).sort((a, b)
 // ---------- render ----------
 function render() {
   if (!days) return;
+  $("comp-tab").hidden = !days.event;
+  movePill($("views"), '[aria-pressed="true"]');
+  if (view === "comp") {
+    if (!days.event) return setBoard("m"); // a #competition link with no contest set
+    renderComp();
+    raceKick();
+    return;
+  }
+  $("race").hidden = false;
+  $("race-title").textContent = "Today's race";
+  $("race-sub").textContent = "Profit the leaders locked in today, sale by sale and payout by payout. Drag across the chart to rewind.";
   const B = BOARDS[board];
   $("b-chip").textContent = B.chip;
   $("b-title").innerHTML = `<span class="h-emoji" aria-hidden="true">${B.emoji}</span>Who's <em>up</em> on ${B.noun}?`;
@@ -1041,17 +1118,26 @@ document.addEventListener("keydown", (e) => { if (e.key === "Enter" && e.target.
 const BOARDS = {
   m: { emoji: "📊", chip: "XO Markets", noun: "markets", word: "Markets", lede: "Every day on XO Market's prediction markets: who locked in the most profit, who's racing ahead, and where you stand. Past days are in the leaderboard." },
   c: { emoji: "👫", chip: "XO Convictions", noun: "convictions", word: "Convictions", lede: "Every day on XO Market's convictions: who locked in the most profit, who's racing ahead, and where you stand. Past days are in the leaderboard." },
+  f: {}, // the contest: its own blocks, see the contest view
 };
-let board = location.hash === "#convictions" ? "c" : "m", RAW = null;
-const view = "today", OFF = null, raceComp = () => false; // the Pulse page's competition view isn't part of this one
+const HASHES = { c: "#convictions", f: "#competition" };
+let board = location.hash === HASHES.c ? "c" : location.hash === HASHES.f ? "f" : "m", RAW = null;
+let view = board === "f" ? "comp" : "today";
+function showView() {
+  root.dataset.view = view;
+  document.querySelectorAll(".v-today").forEach((el) => (el.hidden = view !== "today"));
+  document.querySelectorAll(".v-comp").forEach((el) => (el.hidden = view !== "comp"));
+}
+if (view === "comp") showView(); // a #competition link shows the contest's blocks straight away, not the daily ones first
 function boardData(dd) {
-  const b = dd[board] || { days: [], spark: {}, big: [] };
-  return { updatedAt: dd.updatedAt, today: dd.today, users: dd.users, markets: dd.markets || {}, days: b.days, todaySpark: b.spark, big: b.big || [], open: b.open, event: null, hidden: 0 };
+  const b = dd[board === "f" ? "m" : board] || { days: [], spark: {}, big: [] }; // the contest has its own blocks; the daily code keeps reading markets
+  return { updatedAt: dd.updatedAt, today: dd.today, users: dd.users, markets: dd.markets || {}, days: b.days, todaySpark: b.spark, big: b.big || [], open: b.open, event: dd.event || null, hidden: 0 };
 }
 function setBoard(b) {
   if (b === board || !BOARDS[b]) return;
-  board = b;
-  history.replaceState(null, "", location.pathname + location.search + (b === "c" ? "#convictions" : ""));
+  board = b; view = b === "f" ? "comp" : "today"; compCache = null; race.played = false;
+  showView();
+  history.replaceState(null, "", location.pathname + location.search + (HASHES[b] || ""));
   for (const x of $("views").querySelectorAll("[data-board]")) x.setAttribute("aria-pressed", String(x.dataset.board === b));
   movePill($("views"), '[aria-pressed="true"]');
   if (!RAW) return;
@@ -1063,9 +1149,185 @@ function setBoard(b) {
   if (days.days.length) { period = days.days.some((x) => x.d === days.today) ? days.today : days.days[0].d; periodSet = true; }
   render();
   raceKick();
+  if (view === "comp") loadOfficial();
 }
 $("views").addEventListener("click", (e) => { const x = e.target.closest("[data-board]"); if (x) setBoard(x.dataset.board); });
-for (const x of $("views").querySelectorAll("[data-board]")) x.setAttribute("aria-pressed", String(x.dataset.board === board)); // a #convictions link opens that board
+for (const x of $("views").querySelectorAll("[data-board]")) x.setAttribute("aria-pressed", String(x.dataset.board === board)); // a #convictions or #competition link opens that board
+// ---------- contest view ----------
+// XO's official board for the contest set in config.json. The page reads it straight from XO once a minute; the indexer
+// keeps a copy (`event.board`, shown until XO answers and kept if XO stops serving it) and the score history for the race.
+let OFF = null, compCache = null, lastPhase = null, compShown = 25;
+const OFF_API = (slug) => XO_API + "/contests/" + encodeURIComponent(slug);
+const raceComp = () => view === "comp" && !!(days && days.event);
+const raceMoney = (v) => money(v, !raceComp()); // volume only goes up: no plus sign
+const fmtUTC = (t) => new Date(t).toLocaleString("en-US", { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit", hourCycle: "h23", timeZone: "UTC" }).replace(",", "");
+function leftText(ms) {
+  ms = Math.max(0, ms);
+  const d = Math.floor(ms / 864e5), h = Math.floor(ms / 36e5) % 24, m = Math.floor(ms / 6e4) % 60, sec = Math.floor(ms / 1e3) % 60;
+  return d ? `${d}d ${h}h ${String(m).padStart(2, "0")}m` : h ? `${h}h ${String(m).padStart(2, "0")}m` : `${m}m ${String(sec).padStart(2, "0")}s`;
+}
+const whenLeft = (t) => "in " + leftText(t - Date.now()).replace(/ \d+s$/, "");
+const compPhase = () => { const ev = days.event, t = Date.now(); return t < ev.start ? "before" : t >= ev.end ? "after" : "live"; };
+const offDetail = () => (OFF && OFF.detail) || (days.event.board && days.event.board.detail) || {};
+async function loadOfficial() {
+  const ev = days && days.event;
+  if (!ev || !ev.slug || view !== "comp") return;
+  try {
+    const get = (u) => fetch(u, { cache: "no-store" }).then((r) => { if (!r.ok) throw new Error(r.status); return r.json(); });
+    const base = OFF_API(ev.slug), [detail, first] = await Promise.all([get(base), get(base + "/leaderboard?page=1&pageSize=50")]);
+    const items = [...(first.items || [])];
+    for (let page = 2; items.length < (first.total || 0) && page <= 20; page++) {
+      const d = await get(`${base}/leaderboard?page=${page}&pageSize=50`);
+      if (!d.items || !d.items.length) break;
+      items.push(...d.items);
+    }
+    const kept = ev.board && ev.board.items && ev.board.items.length ? ev.board.items : null;
+    OFF = { detail, items: items.length || !kept ? items : kept, updatedAt: Date.parse(first.updatedAt) || Date.now() };
+    compCache = null;
+    if (view === "comp") { render(); raceKick(); }
+  } catch (e) { /* keep what we had; the table says when there is nothing yet */ }
+}
+setInterval(loadOfficial, 6e4);
+function offRows() {
+  const items = OFF ? OFF.items : (days.event.board && days.event.board.items) || [];
+  return items.map((it) => {
+    const meta = days.users[it.username] || [];
+    return { u: it.username, a: it.profilePictureUrl || meta[0] || "", v: meta[1] || 0, c: meta[2] || "", vol: Number(it.score ?? it.volumeUsdc ?? 0), pnl: it.pnlUsdc == null ? null : Number(it.pnlUsdc), qualified: !!it.qualified, rank: it.rank };
+  });
+}
+// CP and USDC written the way XO's contest page does: the coin, then the amount
+const coin = (k) => k === "cp" ? '<img class="coin" src="icons/cp.svg" alt="CP" title="CP" width="16" height="16">' : '<img class="coin" src="icons/usdc.png" alt="USDC" title="USDC" width="16" height="16">';
+const amt = (k, text) => `<span class="amt">${coin(k)}${text}</span>`;
+const prizeOf = (b) => `${amt("usdc", b.usdc.toLocaleString("en-US") + " USDC")}${amt("cp", b.cp.toLocaleString("en-US") + " CP")}`;
+const prizeFor = (rank) => { const b = (offDetail().prizeBands || []).find((x) => rank >= x.rankFrom && rank <= x.rankTo); return b ? prizeOf(b) : ""; };
+const paidPlaces = () => Math.max(...(offDetail().prizeBands || []).map((b) => b.rankTo), 0);
+const brief = (n) => (n >= 1000 ? +(n / 1000).toPrecision(2) + "K" : String(n)); // 33333 -> 33K, 3333 -> 3.3K: the exact prizes are in the list
+const nth = (n) => n + (n % 100 >= 11 && n % 100 <= 13 ? "th" : { 1: "st", 2: "nd", 3: "rd" }[n % 10] || "th");
+// the tag beside a name on the chart. tone: "ok" in the prizes, "near" ranked outside them, "need" joined without the volume
+function offStatus(u) {
+  const all = offRows(), r = all.find((x) => x.u.toLowerCase() === u.toLowerCase());
+  if (!r) return null;
+  if (!r.qualified) return compPhase() === "after" ? null : { tone: "need", text: money(Math.max(0, (offDetail().minQualifyingVolumeUsdc || 0) - r.vol), false) };
+  const paid = paidPlaces();
+  if (r.rank <= paid) return { tone: "ok", text: `#${r.rank}` };
+  const last = all.find((x) => x.qualified && x.rank === paid);
+  return { tone: "near", text: last ? money(Math.max(0, last.vol - r.vol), false) : `#${r.rank}` };
+}
+// each trader's line over the contest, ending on XO's live score so the label matches the table (the data file lags it by minutes)
+function compRaceRows() {
+  if (compCache) return compCache;
+  const sp = days.event.spark || {}, len = (Object.values(sp)[0] || [0, 0]).length;
+  return (compCache = offRows().filter((r) => r.vol > 0).map((r) => {
+    const spark = (sp[r.u] || new Array(len).fill(0)).slice();
+    spark[spark.length - 1] = r.vol;
+    return { ...r, spark };
+  }).sort((a, b) => b.qualified - a.qualified || b.vol - a.vol));
+}
+// the clock and the progress bar, every second while the view is open
+function tickComp() {
+  if (!days || !days.event || view !== "comp") return;
+  const ev = days.event, ph = compPhase(), t = Date.now();
+  const first = ph === "after" && offRows().find((r) => r.qualified && r.rank === 1);
+  $("c-left-label").textContent = ph === "before" ? "Starts in" : ph === "live" ? "Ends in" : "Winner";
+  $("c-left").textContent = ph === "before" ? leftText(ev.start - t) : ph === "live" ? leftText(ev.end - t) : first ? first.u : "–";
+  $("c-meter").style.width = ph === "before" ? "0%" : ph === "after" ? "100%" : `${Math.min(100, ((t - ev.start) / (ev.end - ev.start)) * 100).toFixed(2)}%`;
+  if (ph !== lastPhase) { lastPhase = ph; render(); } // the start or the end just passed
+}
+setInterval(tickComp, 1000);
+function renderComp() {
+  const ev = days.event, ph = compPhase(), det = offDetail();
+  lastPhase = ph;
+  for (const el of document.querySelectorAll(".race-box.sk-box")) el.classList.remove("sk-box");
+  const paid = paidPlaces(), minVol = det.minQualifyingVolumeUsdc, minFill = det.minTradeUsdc;
+  const range = `${fmtUTC(ev.start)} – ${fmtUTC(ev.end)}`, scope = det.scopeLabel || "Contest", noun = scope.toLowerCase();
+  const off = offRows(), ranked = off.filter((r) => r.qualified), waiting = off.filter((r) => !r.qualified);
+  $("c-scope").textContent = `⚽ ${scope} · volume`;
+  $("c-phase").textContent = { before: "Starts soon", live: "Live", after: "Final" }[ph];
+  $("c-phase").className = "chip " + (ph === "after" ? "down" : "up");
+  $("c-title").innerHTML = '<span class="h-emoji" aria-hidden="true">🏆</span>' + esc(ev.name).replace(/(\S+)$/, "<em>$1</em>");
+  $("c-lede").textContent = ph === "before"
+    ? `${Math.round((ev.end - ev.start) / 864e5)} days of ${noun} markets and convictions on XO, ranked by trading volume. It starts ${whenLeft(ev.start)}: the leaderboard opens here with the first counted trades.`
+    : ph === "live" ? `XO's official board, live: traders who joined the contest, ranked by their volume on ${noun} markets and convictions since joining.${paid ? ` The top ${paid} win prizes.` : ""}`
+    : "The contest is over. These are the final standings; XO Market confirms the winners and the prizes.";
+  $("c-dates").textContent = `${dayUTC(ev.start)} – ${dayUTC(ev.end)}`;
+  const joinUrl = (ev.url || "https://beta.xo.market/contests") + "?r=andriy_shkinder";
+  $("c-join").href = $("c-note-join").href = joinUrl;
+  $("c-prizes").innerHTML = det.budgetUsdc != null ? `${amt("usdc", brief(det.budgetUsdc) + " USDC")} + ${amt("cp", brief(det.budgetCp) + " CP")}` : "–";
+  $("c-meter-box").hidden = ph === "before";
+  $("c-cta").hidden = $("c-join-note").hidden = ph === "after";
+  $("c-traders").textContent = det.participantCount != null ? det.participantCount.toLocaleString("en-US") : "–";
+  $("c-ranked").textContent = ranked.length.toLocaleString("en-US");
+  $("c-volume").textContent = money(off.reduce((sum, r) => sum + r.vol, 0), false);
+  $("c-totals-title").textContent = ph === "after" ? "Final totals" : "Contest so far";
+  $("c-totals-note").textContent = ph === "live" ? "XO's official board · live" : "";
+  $("c-bands-note").textContent = paid ? `top ${paid}` : "";
+  $("c-bands").innerHTML = (det.prizeBands || []).map((b) => `<div class="band"><b>${b.rankFrom === b.rankTo ? nth(b.rankFrom) : `${nth(b.rankFrom)}–${nth(b.rankTo)}`}${b.rankFrom === b.rankTo ? "" : " <small>each</small>"}</b><span class="amts num">${prizeOf(b)}</span></div>`).join("");
+  const rules = [
+    ["Entry", `Free${det.eligibility && det.eligibility.requireX ? " · X account required" : ""}`],
+    ["Ranked by", "Trading volume"],
+    ["Counts", det.marketCount ? `${det.marketCount} ${noun} markets and convictions` : `${scope} markets and convictions`],
+    ["To qualify", minVol != null ? `${minVol} USDC volume` : "–"],
+    ["Minimum trade", minFill != null ? `${minFill} USDC` : "–"],
+    ["Cap per market", det.maxVolumePerMarketUsdc != null ? `${det.maxVolumePerMarketUsdc.toLocaleString("en-US")} USDC` : "None"],
+  ];
+  $("c-rules-grid").innerHTML = rules.map(([k, v]) => `<div><small>${k}</small><b>${esc(v)}</b></div>`).join("");
+  $("c-how").innerHTML = [
+    `Only ${noun} markets and convictions traded between ${range} UTC count.`,
+    "This is XO's official contest board: only traders who pressed Join, scored by XO on their trades after joining.",
+    minFill != null ? `Trades under ${minFill} USDC don't count, and neither do parlay stakes.` : "Parlay stakes don't count.",
+    `${paid ? `The top ${paid} win prizes, paid by XO. ` : ""}Scores are final at the end time.`,
+  ].map((x) => `<li>${esc(x)}</li>`).join("");
+  $("c-upd").textContent = OFF ? `Updated ${hm(OFF.updatedAt)}` : "";
+  $("race").hidden = ph === "before"; // no lines before the start
+  $("race-title").textContent = ph === "after" ? "How the contest was won" : "Contest race";
+  $("race-sub").textContent = "Each trader's counted volume since the start, from XO's board, and where each one stands on it. Drag across the chart to rewind.";
+  tickComp();
+
+  // top three: the leaders while it runs, the winners once it's over, with what they would win
+  $("c-pod-title").textContent = ph === "after" ? "Winners" : "Top 3 so far";
+  $("c-pod-note").textContent = ph === "after" ? `${dayUTC(ev.start)} – ${dayUTC(ev.end)}` : ph === "live" ? "official · live" : "";
+  $("c-podium").previousElementSibling.hidden = $("c-podium").hidden = ph === "before";
+  const top3 = ranked.slice(0, 3);
+  $("c-podium").innerHTML = ph === "before" ? "" : !top3.length
+    ? `<div class="card pod-empty">Nobody has qualified yet: it takes ${minVol ?? ""} USDC of volume after joining.</div>`
+    : top3.map((r, i) => `<div class="card pod p${i + 1}">
+        <div class="top"><span class="place">${i + 1}</span>${avatar(r, "md")}<span class="name"><span>${esc(r.u)}</span>${r.v ? VER : ""}</span></div>
+        <div class="pnl num">${money(r.vol, false)}</div>
+        <div class="sub"><span><b class="num">${prizeFor(r.rank)}</b></span>${r.pnl != null ? `<span><b class="num ${cls(r.pnl)}">${money(r.pnl)}</b> PnL</span>` : ""}</div>
+      </div>`).join("");
+
+  // the board: XO's ranking, the prize each place pays, and who still needs volume to qualify
+  $("c-board-title").textContent = ph === "after" ? "Final standings" : "Contest leaderboard";
+  $("c-period").textContent = range + " UTC";
+  if (ph === "before") {
+    $("c-table").innerHTML = `<div class="empty"><b>Starts ${whenLeft(ev.start)}</b>${fmtUTC(ev.start)} UTC, ${hm(ev.start)} your time. Join on XO before you trade: only trades after joining count.</div>`;
+    return;
+  }
+  const all = [...ranked, ...waiting];
+  if (!all.length) { $("c-table").innerHTML = `<div class="empty"><b>Nobody yet</b>Traders appear here once XO has counted their trades.</div>`; return; }
+  const list = all.slice(0, compShown);
+  const place = (r) => (r.qualified ? (r.rank <= 3 ? `<span class="place p${r.rank}">${r.rank}</span>` : `<span class="n num">${r.rank}</span>`) : `<span class="n num muted">–</span>`);
+  const tag = (tone, text) => `<b class="tk ${tone}">${text}</b>`;
+  const status = (r) => r.qualified ? prizeFor(r.rank) || tag("near", "outside the prizes")
+    : ph === "after" ? tag("out", "didn't qualify") : tag("need", `${money(Math.max(0, (minVol || 0) - r.vol), false)} more to qualify`);
+  const pnlOf = (r) => (r.pnl == null ? "–" : `<span class="${cls(r.pnl)}">${money(r.pnl)}</span>`);
+  const name = (r) => `<span style="overflow:hidden;text-overflow:ellipsis">${esc(r.u)}</span>${r.v ? VER : ""}`;
+  $("c-table").innerHTML = `<div class="tscroll"><table>
+      <thead><tr><th>#</th><th>Trader</th><th>Counted volume</th><th>PnL</th><th>Prize</th></tr></thead>
+      <tbody>${list.map((r) => `<tr class="off">
+        <td><span class="rk">${place(r)}</span></td>
+        <td><span class="trader">${avatar(r)}<span style="min-width:0"><span class="nm" style="display:flex;align-items:center;gap:4px">${name(r)}</span></span></span></td>
+        <td class="main num"><span class="mainv">${money(r.vol, false)}</span></td>
+        <td class="num">${pnlOf(r)}</td>
+        <td class="num">${status(r)}</td></tr>`).join("")}</tbody></table></div>
+    <div class="mlist">${list.map((r) => `<div class="mrow off">
+        <div class="mtop"><span class="rk">${place(r)}</span>${avatar(r)}<span class="nm">${name(r)}</span><span class="mmain num"><span class="mainv">${money(r.vol, false)}</span></span></div>
+        <div class="mstats num"><span><i>PnL</i>${pnlOf(r)}</span><span>${status(r)}</span></div>
+      </div>`).join("")}</div>
+    ${all.length > compShown ? `<div class="more"><button class="btn" id="c-more">Show all ${all.length}</button></div>` : ""}`;
+}
+document.addEventListener("click", (e) => { if (e.target.closest("#c-more")) { compShown = 1e9; render(); } });
+
 function renderWins() {
   const list = (days.big || []).filter((x) => x[2] > 0);
   $("wins-note").textContent = `since ${dayStartLocal()}`;
@@ -1122,6 +1384,7 @@ function raceImg(r) {
   return im.complete && im.naturalWidth ? im : null;
 }
 function raceSet() {
+  if (raceComp()) return compRaceRows().slice(0, race.n).map((r, i) => ({ r, color: RACE_COLORS[i % RACE_COLORS.length] }));
   const set = rows.slice(0, race.n).map((r, i) => ({ r, color: RACE_COLORS[i % RACE_COLORS.length] }));
   if (me && !set.some((x) => x.r === me)) set.push({ r: me, color: null }); // drawn in the ink colour
   return set;
@@ -1140,7 +1403,7 @@ function drawRace() {
   const set = raceSet();
   for (const x of set) if (!x.color) x.color = ink;
   race.hits = [];
-  if (!set.length) { c.fillStyle = ink2; c.font = F(500, 14); c.textAlign = "center"; c.textBaseline = "middle"; c.fillText("Today's race starts with the first sale or payout.", W / 2, H / 2); return; }
+  if (!set.length) { c.fillStyle = ink2; c.font = F(500, 14); c.textAlign = "center"; c.textBaseline = "middle"; c.fillText(raceComp() ? "The race starts with the first counted trade." : "Today's race starts with the first sale or payout.", W / 2, H / 2); return; }
 
   const narrow = W < 560;
   const tags = raceComp() && !!OFF; // XO-board tags beside the names
@@ -1157,7 +1420,7 @@ function drawRace() {
       let name = x.r.u; while (name.length > 4 && c.measureText(name).width > 86) name = name.slice(0, -2) + "…";
       w += c.measureText(name).width + 6;
     }
-    c.font = F(700, fs); w += c.measureText(money(far)).width;
+    c.font = F(700, fs); w += c.measureText(raceMoney(far)).width;
     if (tags) { const st = offStatus(x.r.u); if (st) { c.font = F(600, Math.max(10, fs - 1.5)); w += 7 + c.measureText(st.text).width + 12; } }
     need = Math.max(need, w + 10);
   }
@@ -1187,7 +1450,7 @@ function drawRace() {
     const y = Y(v);
     if (y < T + 4 || y > B - 4) continue;
     c.strokeStyle = line; c.globalAlpha = 0.7; c.beginPath(); c.moveTo(L, Math.round(y) + 0.5); c.lineTo(R, Math.round(y) + 0.5); c.stroke(); c.globalAlpha = 1;
-    c.fillStyle = ink3; c.fillText(money(v).replace(/\.00$/, ""), L + 2, y - 3);
+    c.fillStyle = ink3; c.fillText(raceMoney(v).replace(/\.00$/, ""), L + 2, y - 3);
   }
   // hours along the bottom on the visitor's clock; over a competition, days (UTC)
   c.textBaseline = "top"; c.textAlign = "center";
@@ -1204,7 +1467,7 @@ function drawRace() {
   }
   // break-even, drawn like Pulse's price to beat
   const y0 = Math.round(Y(0)) + 0.5;
-  c.strokeStyle = ink3; c.setLineDash([5, 5]); c.beginPath(); c.moveTo(L, y0); c.lineTo(R, y0); c.stroke(); c.setLineDash([]);
+  if (!comp) { c.strokeStyle = ink3; c.setLineDash([5, 5]); c.beginPath(); c.moveTo(L, y0); c.lineTo(R, y0); c.stroke(); c.setLineDash([]); }
   c.font = F(600, 11); c.fillStyle = ink2; c.textAlign = "left"; c.textBaseline = "bottom"; c.fillText("$0", L + 2, y0 - 3);
 
   // lines: leader last so it sits on top, the picked trader above everyone
@@ -1263,7 +1526,7 @@ function drawRace() {
       c.fillText(name, tx, h.ly + 0.5); tx += c.measureText(name).width + 6;
     }
     c.font = F(700, fs); c.fillStyle = h.v > 0.004 ? V("--pos") : h.v < -0.004 ? V("--neg") : ink3;
-    const txt = money(h.v); c.fillText(txt, tx, h.ly + 0.5);
+    const txt = raceMoney(h.v); c.fillText(txt, tx, h.ly + 0.5);
     let tagEnd = tx + c.measureText(txt).width;
     if (tags) {
       const st = offStatus(h.r.u);
@@ -1573,7 +1836,8 @@ async function load() {
   if (RAW && dd.updatedAt <= RAW.updatedAt) { showUpdated(); return; }
   // the chart eases from the lines it was showing to the new ones, but only within the same day
   const was = days && days.today === dd.today ? new Map(rows.map((r) => [r.u, dense(r)])) : null;
-  RAW = dd; days = boardData(dd); dayCache.clear();
+  const firstLoad = !RAW;
+  RAW = dd; days = boardData(dd); dayCache.clear(); compCache = null;
   // the page is about today: the race, the podium, the totals and "Find yourself" all read today's ranking
   rows = dayRows(days.today);
   byName = new Map(rows.map((r) => [r.u.toLowerCase(), r]));
@@ -1587,6 +1851,7 @@ async function load() {
   if (u) { me = byName.get(u.toLowerCase().replace(/^@/, "")) || null; searched = true; if (!$("q").value) $("q").value = me ? me.u : u; }
   render();
   raceKick();
+  if (firstLoad) loadOfficial();
 }
 load();
 setInterval(load, 6e4);

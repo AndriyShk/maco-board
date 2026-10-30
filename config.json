@@ -1,4 +1,8 @@
 {
   "windowDays": 7,
-  "exclude": ["predictiontalk"]
+  "exclude": ["predictiontalk"],
+  "contest": {
+    "slug": "trading-contest-football-1",
+    "url": "https://beta.xo.market/contests/trading-contest-football-1"
+  }
 }

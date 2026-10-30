@@ -7,7 +7,8 @@ Who locked in the most today, who's racing ahead, and where you stand. One board
 
 ## Features
 
-- **Markets | Convictions**: two boards behind one switch in the top bar.
+- **Markets | Convictions | Competition**: three views behind one switch in the top bar. Competition (`/#competition`) shows while a contest is set in `config.json`.
+- **Competition**: XO's official contest board for the contest's scope, ranked by volume: the race chart, the top 3, the leaderboard with prizes, and the rules. Read live from XO; only traders who joined are on it.
 - **Today's race**: a racing line chart of the profit the leaders locked in today. Top 5 / 10 / 20, log or linear scale, drag to rewind, replay.
 - **Biggest wins today**: the largest single-market profits of the day, with the market and the trader.
 - **Top 3 and the leaderboard**: every ranked trader with profit, markets settled, win rate and stake, for today and the past 30 days.
@@ -66,7 +67,7 @@ FULL=1 node scripts/build-board.mjs && scripts/publish.sh
 
 ## Configuration
 
-`config.json`: `windowDays` is how many past days are (re)read, and `exclude` lists usernames kept off the boards (XO's market maker).
+`config.json`: `windowDays` is how many past days are (re)read, `exclude` lists usernames kept off the boards (XO's market maker), and `contest` (`slug`, `url`) names the XO contest behind the Competition view. Dates, prizes and rules come from XO. Remove it and the view goes away.
 
 ## Project layout
 

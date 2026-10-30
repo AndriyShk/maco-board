@@ -18,6 +18,7 @@ const STATE = path("../data/state.json");
 const OUT = path("../data/days.json");
 const DAY = 864e5;
 const SPARK = 96; // points in each trader's PnL line for today (the race chart)
+const CONTEST_SPARK = 240; // points in each trader's line over a contest (four weeks: one every three hours)
 const KEEP_DAYS = 60; // finished days kept in the record
 const SHOWN_DAYS = 30; // days the page lists
 const WATCH = 3 * DAY; // after a market settles, its traders are checked often for this long (payouts land then)
@@ -362,6 +363,52 @@ for (const k of ["m", "c"]) {
   for (const x of out[k].days) for (const r of x.rows) { names.add(r[0]); marketsShown.add(r[7]); }
   for (const b of out[k].big) { names.add(b[0]); marketsShown.add(b[1]); }
 }
+// ---------- XO's contest board ----------
+// Only traders who joined the contest, scored by XO. XO keeps no history, so every run records each trader's score when
+// it changed; the race chart is drawn from that record. state.official: username -> [[unixSeconds, score], ...]
+// The page reads XO's board directly and falls back on the copy kept here, so the final standings stay up if XO stops
+// serving it after the end. An empty answer never replaces a full one.
+if (cfg.contest && cfg.contest.slug) {
+  try {
+    const base = `${API}/contests/${encodeURIComponent(cfg.contest.slug)}`, detail = await getJSON(base);
+    if (!detail) throw new Error("no such contest");
+    const items = [];
+    for (let page = 1; page <= 20; page++) {
+      const d = await getJSON(`${base}/leaderboard?page=${page}&pageSize=50`);
+      if (!d || !d.items) break;
+      items.push(...d.items);
+      if (!d.items.length || items.length >= (d.total || 0)) break;
+    }
+    const start = Date.parse(detail.startAt), end = Date.parse(detail.endAt);
+    state.official ??= {};
+    for (const it of items) {
+      const h = (state.official[it.username] ??= []), last = h[h.length - 1], v = r2(Number(it.score || 0));
+      if (!last || last[1] !== v) h.push([Math.floor(now / 1000), v]);
+    }
+    const to = Math.min(now, end), spark = {};
+    if (now > start) for (const it of items) {
+      const h = state.official[it.username], line = new Array(CONTEST_SPARK);
+      for (let i = 0, j = -1; i < CONTEST_SPARK; i++) {
+        const t = (start + ((i + 1) / CONTEST_SPARK) * (to - start)) / 1000;
+        while (j + 1 < h.length && h[j + 1][0] <= t) j++;
+        line[i] = j < 0 ? 0 : h[j][1];
+      }
+      spark[it.username] = line;
+    }
+    const keep = (o, keys) => Object.fromEntries(keys.filter((k) => o[k] !== undefined).map((k) => [k, o[k]]));
+    state.contest = {
+      name: detail.name, start, end, spark, sparkTo: to, updatedAt: now,
+      detail: keep(detail, ["scopeLabel", "marketCount", "budgetCp", "budgetUsdc", "participantCount", "prizeBands", "minQualifyingVolumeUsdc", "minTradeUsdc", "maxVolumePerMarketUsdc", "eligibility"]),
+      items: items.length || !state.contest ? items.map((it) => keep(it, ["username", "profilePictureUrl", "pnlUsdc", "score", "volumeUsdc", "qualified", "rank"])) : state.contest.items,
+    };
+  } catch (e) { console.log("contest board skipped:", e.message); }
+  if (state.contest) {
+    const k = state.contest;
+    out.event = { slug: cfg.contest.slug, url: cfg.contest.url || null, name: k.name, start: k.start, end: k.end, spark: k.spark, sparkTo: k.sparkTo, board: { updatedAt: k.updatedAt, detail: k.detail, items: k.items } };
+    for (const it of k.items) names.add(it.username);
+  }
+}
+
 out.users = Object.fromEntries([...names].map((u) => [u, state.meta[u] || ["", 0, ""]]));
 out.markets = Object.fromEntries([...marketsShown].filter((id) => state.markets[id]).map((id) => { const m = state.markets[id]; return [id, [m.t, m.s, m.i]]; }));
 out.updatedAt = Date.now(); // when the run finished: a run on GitHub can take minutes
