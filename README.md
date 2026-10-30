@@ -7,7 +7,7 @@ Who locked in the most today, who's racing ahead, and where you stand. One board
 
 ## Features
 
-- **Markets | Convictions | Contest**: three views behind one switch in the top bar. Contest (`/#competition`) shows while a contest is set in `config.json`.
+- **Markets | Convictions | Contest**: three views behind one switch in the top bar. Contest (`/#contest`) shows while a contest is set in `config.json`.
 - **Contest**: XO's official contest board for the contest's scope, ranked by volume: the race chart, the top 3, the leaderboard with prizes, and the rules. Read live from XO; only traders who joined are on it.
 - **Today's race**: a racing line chart of the profit the leaders locked in today. Top 5 / 10 / 20, log or linear scale, drag to rewind, replay.
 - **Biggest wins today**: the largest single-market profits of the day, with the market and the trader.

@@ -896,7 +896,7 @@ function render() {
   $("comp-tab").hidden = !days.event;
   movePill($("views"), '[aria-pressed="true"]');
   if (view === "comp") {
-    if (!days.event) return setBoard("m"); // a #competition link with no contest set
+    if (!days.event) return setBoard("m"); // a #contest link with no contest set
     renderComp();
     raceKick();
     return;
@@ -1120,7 +1120,8 @@ const BOARDS = {
   c: { emoji: "👫", chip: "XO Convictions", noun: "convictions", word: "Convictions", lede: "Every day on XO Market's convictions: who locked in the most profit, who's racing ahead, and where you stand. Past days are in the leaderboard." },
   f: {}, // the contest: its own blocks, see the contest view
 };
-const HASHES = { c: "#convictions", f: "#competition" };
+const HASHES = { c: "#convictions", f: "#contest" };
+if (location.hash === "#competition") history.replaceState(null, "", location.pathname + location.search + HASHES.f); // the old address: links already posted keep working
 let board = location.hash === HASHES.c ? "c" : location.hash === HASHES.f ? "f" : "m", RAW = null;
 let view = board === "f" ? "comp" : "today";
 function showView() {
@@ -1128,7 +1129,7 @@ function showView() {
   document.querySelectorAll(".v-today").forEach((el) => (el.hidden = view !== "today"));
   document.querySelectorAll(".v-comp").forEach((el) => (el.hidden = view !== "comp"));
 }
-if (view === "comp") showView(); // a #competition link shows the contest's blocks straight away, not the daily ones first
+if (view === "comp") showView(); // a #contest link shows the contest's blocks straight away, not the daily ones first
 function boardData(dd) {
   const b = dd[board === "f" ? "m" : board] || { days: [], spark: {}, big: [] }; // the contest has its own blocks; the daily code keeps reading markets
   return { updatedAt: dd.updatedAt, today: dd.today, users: dd.users, markets: dd.markets || {}, days: b.days, todaySpark: b.spark, big: b.big || [], open: b.open, event: dd.event || null, hidden: 0 };
@@ -1244,7 +1245,7 @@ function renderComp() {
   $("c-scope").textContent = `⚽ ${scope} · volume`;
   $("c-phase").textContent = { before: "Starts soon", live: "Live", after: "Final" }[ph];
   $("c-phase").className = "chip " + (ph === "after" ? "down" : "up");
-  $("c-title").innerHTML = '<span class="h-emoji" aria-hidden="true">🏆</span>' + esc(ev.name).replace(/(\S+)$/, "<em>$1</em>");
+  $("c-title").innerHTML = '<span class="h-emoji" aria-hidden="true">⚽</span>' + esc(ev.name).replace(/(\S+)$/, "<em>$1</em>");
   $("c-lede").textContent = ph === "before"
     ? `${Math.round((ev.end - ev.start) / 864e5)} days of ${noun} markets and convictions on XO, ranked by trading volume. It starts ${whenLeft(ev.start)}: the leaderboard opens here with the first counted trades.`
     : ph === "live" ? `XO's official board, live: traders who joined the contest, ranked by their volume on ${noun} markets and convictions since joining.${paid ? ` The top ${paid} win prizes.` : ""}`
