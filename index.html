@@ -92,9 +92,19 @@
   .nudge p { font-size: 13px; color: var(--ink-2); line-height: 1.45; }
   .nudge-link { font-weight: 700; white-space: nowrap; color: var(--up-text); text-decoration: none; }
   .nudge-link:hover { text-decoration: underline; }
+  /* the matches fill the height beside the contest card, the Join reminder sits under them */
+  @media (min-width: 861px) {
+    :root[data-view="comp"] .hero { grid-template-rows: 1fr auto; }
+    :root[data-view="comp"] .hero > .intro.v-comp { grid-row: 1 / span 2; }
+    :root[data-view="comp"] .hero > .nudge { grid-column: 2; }
+  }
+  /* it's over: results only, the contest card on its own */
+  :root[data-view="comp"][data-final] .hero { grid-template-columns: minmax(0,1fr); }
+  .win .when { font-size: 13px; font-weight: 600; color: var(--ink-2); white-space: nowrap; }
   /* the contest's rules, from XO */
   .rules-card { margin-top: 16px; padding: 16px 20px; }
   .rules-card h2 { font-size: 15px; font-weight: 600; margin-bottom: 10px; }
+  .rules-card h2 small { font-size: 12px; font-weight: 500; color: var(--ink-3); margin-left: 4px; }
   .rules { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); border: 1px solid var(--line); border-radius: 12px; overflow: hidden; }
   .rules > div { padding: 10px 14px; min-width: 0; }
   .rules > div + div { border-left: 1px solid var(--line); }
@@ -104,8 +114,8 @@
   .rules b { display: block; font-size: 14px; font-weight: 600; margin-top: 2px; }
   @media (max-width: 860px) { .rules { grid-template-columns: 1fr 1fr; } .rules > div:nth-child(even) { border-left: 1px solid var(--line); } .rules > div:nth-child(odd) { border-left: 0; } .rules > div:nth-child(n+3) { border-top: 1px solid var(--line); } }
   .c-podium .pod { cursor: default; }
-  /* the prize list beside the contest card */
-  .bands { display: flex; flex-direction: column; flex: 1; }
+  /* the prize list, under the rules */
+  .bands { display: flex; flex-direction: column; }
   .band { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 10px 0; font-size: 14px; }
   .band + .band { border-top: 1px solid var(--line); }
   .band b { font-weight: 600; }
@@ -117,7 +127,6 @@
     .facts .fact:nth-child(2) { grid-column: 1 / -1; order: 3; border-left: 0; border-top: 1px solid var(--line); }
     .facts .fact:nth-child(3) { border-left: 1px solid var(--line); }
   }
-  .band-note { font-size: 13px; color: var(--ink-2); line-height: 1.45; }
   .coin { width: 1.1em; height: 1.1em; vertical-align: -.2em; margin-right: .3em; flex: none; }
   .amt { white-space: nowrap; }
   .amt + .amt { margin-left: .6em; }
@@ -584,16 +593,25 @@
       </div>
     </div>
 
-    <div class="card wins v-comp" hidden>
-      <div class="wins-head"><b>Prizes</b><small id="c-bands-note"></small></div>
-      <div class="bands" id="c-bands"></div>
-      <p class="band-note" id="c-join-note">Only trades after you join count. <a class="nudge-link" id="c-note-join" target="_blank" rel="noopener">Join on XO ↗</a></p>
+    <div class="card wins v-comp" id="c-matches-card" hidden>
+      <div class="wins-head"><b>Matches</b><small id="c-matches-note"></small></div>
+      <div class="wins-list" id="c-matches"></div>
+    </div>
+
+    <div class="card nudge v-comp" id="c-nudge" hidden>
+      <div class="nudge-head"><span class="nudge-ic" aria-hidden="true">!</span><b>Don't forget to press Join</b></div>
+      <p>Only trades after you join count. Trading football on XO without joining doesn't get you on this board. <a class="nudge-link" id="c-nudge-join" target="_blank" rel="noopener">Join on XO ↗</a></p>
     </div>
   </section>
 
   <section class="card rules-card v-comp" id="c-rules" hidden>
     <h2>Rules</h2>
     <div class="rules" id="c-rules-grid"></div>
+  </section>
+
+  <section class="card rules-card v-comp" id="c-prizes-card" hidden>
+    <h2>Prizes <small id="c-bands-note"></small></h2>
+    <div class="bands" id="c-bands"></div>
   </section>
 
   <section class="card race" id="race">
@@ -1238,6 +1256,25 @@ function tickComp() {
   if (ph !== lastPhase) { lastPhase = ph; render(); } // the start or the end just passed
 }
 setInterval(tickComp, 1000);
+// the contest's matches: the ones being played first, then by kickoff, soonest first
+const MATCH_MS = 3 * 36e5; // XO closes a match's trading three hours after kickoff
+function renderMatches() {
+  if (compPhase() === "after") return;
+  const t = Date.now(), isLive = (m) => m.k <= t;
+  const list = (days.event.matches || []).map(([s, title, league, k, e, i]) => ({ s, title, league, k, e, i }))
+    .filter((m) => t < m.e && t < m.k + MATCH_MS) // over; or XO moved a match it hasn't updated
+    .sort((a, b) => isLive(b) - isLive(a) || a.k - b.k);
+  const live = list.filter(isLive).length, box = $("c-matches"), at = box.scrollTop;
+  $("c-matches-note").textContent = live ? `${live} live · ${list.length - live} upcoming` : `${list.length} upcoming`;
+  box.innerHTML = list.length ? list.map((m) => `<a class="win" href="https://beta.xo.market/event/${encodeURIComponent(m.s)}?r=andriy_shkinder" target="_blank" rel="noopener">
+      ${m.i ? `<img class="pic" src="${esc(m.i)}" alt="" loading="lazy" referrerpolicy="no-referrer">` : `<span class="pic"></span>`}
+      <span style="min-width:0"><span class="t">${esc(m.title)}</span><span class="by"><span>${isLive(m) ? `Kicked off ${hm(m.k)}` : `${day(m.k)}, ${hm(m.k)}`} · ${esc(m.league)}</span></span></span>
+      ${isLive(m) ? `<span class="chip up">Live</span>` : `<span class="when num">${leftText(m.k - t).replace(/ \d+s$/, "")}</span>`}</a>`).join("")
+    : `<div class="wins-empty">No matches scheduled right now.</div>`;
+  sizeLists();
+  box.scrollTop = at;
+}
+setInterval(() => { if (view === "comp" && days && days.event) renderMatches(); }, 3e4);
 function renderComp() {
   const ev = days.event, ph = compPhase(), det = offDetail();
   lastPhase = ph;
@@ -1255,10 +1292,12 @@ function renderComp() {
     : "The contest is over. These are the final standings; XO Market confirms the winners and the prizes.";
   $("c-dates").textContent = `${dayUTC(ev.start)} – ${dayUTC(ev.end)}`;
   const joinUrl = (ev.url || "https://beta.xo.market/contests") + "?r=andriy_shkinder";
-  $("c-join").href = $("c-note-join").href = joinUrl;
+  $("c-join").href = $("c-nudge-join").href = joinUrl;
   $("c-prizes").innerHTML = det.budgetUsdc != null ? `${amt("usdc", brief(det.budgetUsdc) + " USDC")} + ${amt("cp", brief(det.budgetCp) + " CP")}` : "–";
   $("c-meter-box").hidden = ph === "before";
-  $("c-cta").hidden = $("c-join-note").hidden = ph === "after";
+  root.toggleAttribute("data-final", ph === "after");
+  $("c-cta").hidden = $("c-nudge").hidden = $("c-matches-card").hidden = ph === "after";
+  renderMatches();
   $("c-traders").textContent = det.participantCount != null ? det.participantCount.toLocaleString("en-US") : "–";
   $("c-ranked").textContent = ranked.length.toLocaleString("en-US");
   $("c-volume").textContent = money(off.reduce((sum, r) => sum + r.vol, 0), false);
@@ -1343,16 +1382,18 @@ function renderWins() {
       <span style="min-width:0"><span class="t">${esc(m[0])}</span><span class="by">${avatar({ u, a, v, c }, "sm")}<span>${esc(u)}</span>${v ? VER : ""}</span></span>
       <b class="p num pos">${money(pnl)}</b></a>`;
   }).join("") : `<div class="wins-empty">No winning ${BOARDS[board].noun} settled yet today.</div>`;
-  sizeWins();
+  sizeLists();
   $("wins-list").scrollTop = at;
 }
 // on a phone the card stands alone, with no height to fill: four rows show, the rest scroll. Measured, because a long title makes its row taller
-function sizeWins() {
-  const box = $("wins-list"), last = box.children[3];
-  box.style.maxHeight = matchMedia("(max-width: 860px)").matches && box.children.length > 4 && last.offsetHeight ? `${last.offsetTop + last.offsetHeight}px` : "";
+function sizeLists() {
+  for (const box of [$("wins-list"), $("c-matches")]) {
+    const last = box.children[3];
+    box.style.maxHeight = matchMedia("(max-width: 860px)").matches && box.children.length > 4 && last.offsetHeight ? `${last.offsetTop + last.offsetHeight}px` : "";
+  }
 }
-addEventListener("resize", sizeWins);
-document.fonts.ready.then(sizeWins);
+addEventListener("resize", sizeLists);
+document.fonts.ready.then(sizeLists);
 
 // ---------- race chart ----------
 // Canvas line race in the spirit of the Pulse chart: one line per trader, a dashed break-even line where Pulse has

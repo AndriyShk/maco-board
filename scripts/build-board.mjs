@@ -395,16 +395,41 @@ if (cfg.contest && cfg.contest.slug) {
       }
       spark[it.username] = line;
     }
+    // the contest's matches, from the events its markets belong to. An event is re-read every 6 hours in case a match
+    // moves; one without a kickoff (a season winner) never gets one. state.contestEvents: eventId -> { at, s, t, l, k, i }
+    const events = {}; // eventId -> a market's picture, for an event with none of its own
+    if (now < end) {
+      for (let page = 1; page <= 20; page++) {
+        const d = await getJSON(`${base}/markets?page=${page}&pageSize=50`);
+        if (!d || !d.items) break;
+        for (const m of d.items) {
+          events[m.eventId] ??= m.imageUrl;
+        }
+        if (!d.hasMore || !d.items.length) break;
+      }
+    }
+    state.contestEvents ??= {};
+    for (const id of Object.keys(events)) {
+      const had = state.contestEvents[id];
+      if (had && (!had.k || now - had.at < 6 * 36e5)) continue;
+      const d = await getJSON(`${API}/v1/events/${encodeURIComponent(id)}`), e = d && (d.data || d);
+      if (!e || !e.slug) continue;
+      const kick = Date.parse((e.metadata || {}).kickoffAt || "");
+      const media = e.media || [], pic = (media.find((m) => m.role === "icon") || media[0] || {}).url || null;
+      state.contestEvents[id] = { at: now, s: e.slug, t: e.title, l: (e.description || "").split(" · ")[0], k: kick || null, i: pic };
+    }
+    const matches = Object.keys(events).map((id) => [id, state.contestEvents[id]]).filter(([, e]) => e && e.k && now < e.k + 3 * 36e5)
+      .map(([id, e]) => [e.s, e.t, e.l, e.k, e.k + 3 * 36e5, e.i || events[id] || null]);
     const keep = (o, keys) => Object.fromEntries(keys.filter((k) => o[k] !== undefined).map((k) => [k, o[k]]));
     state.contest = {
-      name: detail.name, start, end, spark, sparkTo: to, updatedAt: now,
+      name: detail.name, start, end, spark, sparkTo: to, updatedAt: now, matches,
       detail: keep(detail, ["scopeLabel", "marketCount", "budgetCp", "budgetUsdc", "participantCount", "prizeBands", "minQualifyingVolumeUsdc", "minTradeUsdc", "maxVolumePerMarketUsdc", "eligibility"]),
       items: items.length || !state.contest ? items.map((it) => keep(it, ["username", "profilePictureUrl", "pnlUsdc", "score", "volumeUsdc", "qualified", "rank"])) : state.contest.items,
     };
   } catch (e) { console.log("contest board skipped:", e.message); }
   if (state.contest) {
     const k = state.contest;
-    out.event = { slug: cfg.contest.slug, url: cfg.contest.url || null, name: k.name, start: k.start, end: k.end, spark: k.spark, sparkTo: k.sparkTo, board: { updatedAt: k.updatedAt, detail: k.detail, items: k.items } };
+    out.event = { slug: cfg.contest.slug, url: cfg.contest.url || null, name: k.name, start: k.start, end: k.end, spark: k.spark, sparkTo: k.sparkTo, matches: k.matches || [], board: { updatedAt: k.updatedAt, detail: k.detail, items: k.items } };
     for (const it of k.items) names.add(it.username);
   }
 }
