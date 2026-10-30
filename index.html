@@ -489,6 +489,8 @@
   .wins-head b { font-size: 16px; font-weight: 600; }
   .wins-head small { color: var(--ink-3); font-size: 12px; }
   .wins-list { position: relative; display: flex; flex-direction: column; gap: 6px; overflow-y: auto; overscroll-behavior: contain; scrollbar-width: thin; }
+  /* beside the intro card the list takes the height that card leaves and scrolls the rest; it never makes the row taller */
+  @media (min-width: 861px) { .wins-list { flex: 1 1 0; height: 0; min-height: 0; } }
   .win { display: grid; grid-template-columns: 40px minmax(0,1fr) auto; gap: 10px; align-items: center; padding: 8px; border-radius: 12px; color: inherit; text-decoration: none; transition: background .15s; }
   .win:hover { background: var(--control); }
   .win .pic { width: 40px; height: 40px; border-radius: 10px; object-fit: cover; background: var(--control); }
@@ -1344,10 +1346,10 @@ function renderWins() {
   sizeWins();
   $("wins-list").scrollTop = at;
 }
-// four rows show, the rest scroll. Measured, because a long title makes its row taller
+// on a phone the card stands alone, with no height to fill: four rows show, the rest scroll. Measured, because a long title makes its row taller
 function sizeWins() {
   const box = $("wins-list"), last = box.children[3];
-  box.style.maxHeight = box.children.length > 4 && last.offsetHeight ? `${last.offsetTop + last.offsetHeight}px` : "";
+  box.style.maxHeight = matchMedia("(max-width: 860px)").matches && box.children.length > 4 && last.offsetHeight ? `${last.offsetTop + last.offsetHeight}px` : "";
 }
 addEventListener("resize", sizeWins);
 document.fonts.ready.then(sizeWins);
