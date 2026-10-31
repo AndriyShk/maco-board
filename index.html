@@ -1674,8 +1674,14 @@ function cardBase() {
   c.fillStyle = "#a293ff"; rr(84, 84, 56, 56, 14); c.fill();
   c.fillStyle = "#fff"; for (const [x, y, h] of [[96, 109, 16], [105, 100, 25], [114, 105, 20], [123, 95, 30]]) { rr(x, y, 5, h, 2.5); c.fill(); }
   c.fillStyle = ink; c.font = `700 30px ${F}`; c.fillText("Maco Board", 156, 113);
+  const contest = share.race && raceComp(), ev = contest && days.event;
+  if (contest) { // the contest's name beside the site's: Maco Board | ⚽ Hat-trick Hunters
+    const x = 156 + c.measureText("Maco Board").width + 16;
+    c.fillStyle = ink3; c.font = `500 30px ${F}`; c.fillText("|", x, 113);
+    c.fillStyle = ink; c.font = `700 30px ${F}`; c.fillText(`⚽ ${ev.name}`, x + 22, 113);
+  }
   c.textAlign = "right"; c.textBaseline = "alphabetic";
-  c.font = `600 20px ${F}`; c.fillStyle = ink2; c.fillText(`${raceComp() ? days.event.name : `XO ${BOARDS[board].word}`} · ${dayUTC(Date.parse(days.today + "T12:00:00Z"))}`, W - 92, 120);
+  c.font = `600 20px ${F}`; c.fillStyle = ink2; c.fillText(contest ? `${dayUTC(ev.start)} – ${dayUTC(ev.end)}` : `XO ${BOARDS[board].word} · ${dayUTC(Date.parse(days.today + "T12:00:00Z"))}`, W - 92, 120);
   c.fillStyle = ink3; c.fillText(SITE, W - 92, 606);
   c.textAlign = "left";
   return { c, W, F, V, rr, ink, ink2, ink3 };
@@ -1787,10 +1793,10 @@ function sizeCard() {
   cv.getContext("2d").setTransform(s, 0, 0, s, 0, 0);
 }
 function drawRaceCard(P) {
-  const { c, F, ink } = cardBase(), k = raceSet().length > 12 ? 1 : 1.4; // bigger while the labels have room
-  c.fillStyle = ink; c.font = `700 32px ${F}`; c.textBaseline = "alphabetic"; c.fillText($("race-title").textContent, 84, 182);
-  c.save(); c.translate(84, 196); c.scale(k, k);
-  drawRace({ c, W: 1032 / k, H: 386 / k, P, faces: share.faces });
+  const { c, F, ink } = cardBase(), k = raceSet().length > 12 ? 1 : 1.4, top = raceComp() ? 156 : 196; // bigger while the labels have room; a contest's name is in the header
+  if (!raceComp()) { c.fillStyle = ink; c.font = `700 32px ${F}`; c.textBaseline = "alphabetic"; c.fillText($("race-title").textContent, 84, 182); }
+  c.save(); c.translate(84, top); c.scale(k, k);
+  drawRace({ c, W: 1032 / k, H: (582 - top) / k, P, faces: share.faces });
   c.restore();
 }
 async function openRaceShare(mode) {
