@@ -1336,13 +1336,15 @@ function renderComp() {
   $("c-pod-title").textContent = ph === "after" ? "Winners" : "Top 3 so far";
   $("c-pod-note").textContent = ph === "after" ? `${dayUTC(ev.start)} – ${dayUTC(ev.end)}` : ph === "live" ? "official · live" : "";
   $("c-podium").previousElementSibling.hidden = $("c-podium").hidden = ph === "before";
+  // XO fills in PnL only on contests ranked by it; a volume contest answers 0 for everyone, so the column stays out until it says otherwise
+  const showPnl = [...ranked, ...waiting].some((r) => r.pnl);
   const top3 = ranked.slice(0, 3);
   $("c-podium").innerHTML = ph === "before" ? "" : !top3.length
     ? `<div class="card pod-empty">Nobody has qualified yet: it takes ${minVol ?? ""} USDC of volume after joining.</div>`
     : top3.map((r, i) => `<div class="card pod p${i + 1}">
         <div class="top"><span class="place">${i + 1}</span>${avatar(r, "md")}<span class="name"><span>${esc(r.u)}</span>${r.v ? VER : ""}</span></div>
         <div class="pnl num">${money(r.vol, false)}</div>
-        <div class="sub"><span><b class="num">${prizeFor(r.rank)}</b></span>${r.pnl != null ? `<span><b class="num ${cls(r.pnl)}">${money(r.pnl)}</b> PnL</span>` : ""}</div>
+        <div class="sub"><span><b class="num">${prizeFor(r.rank)}</b></span>${showPnl && r.pnl != null ? `<span><b class="num ${cls(r.pnl)}">${money(r.pnl)}</b> PnL</span>` : ""}</div>
       </div>`).join("");
 
   // the board: XO's ranking, the prize each place pays, and who still needs volume to qualify
@@ -1362,16 +1364,16 @@ function renderComp() {
   const pnlOf = (r) => (r.pnl == null ? "–" : `<span class="${cls(r.pnl)}">${money(r.pnl)}</span>`);
   const name = (r) => `<span style="overflow:hidden;text-overflow:ellipsis">${esc(r.u)}</span>${r.v ? VER : ""}`;
   $("c-table").innerHTML = `<div class="tscroll"><table>
-      <thead><tr><th>#</th><th>Trader</th><th>Counted volume</th><th>PnL</th><th>Prize</th></tr></thead>
+      <thead><tr><th>#</th><th>Trader</th><th>Counted volume</th>${showPnl ? "<th>PnL</th>" : ""}<th>Prize</th></tr></thead>
       <tbody>${list.map((r) => `<tr class="off">
         <td><span class="rk">${place(r)}</span></td>
         <td><span class="trader">${avatar(r)}<span style="min-width:0"><span class="nm" style="display:flex;align-items:center;gap:4px">${name(r)}</span></span></span></td>
         <td class="main num"><span class="mainv">${money(r.vol, false)}</span></td>
-        <td class="num">${pnlOf(r)}</td>
+        ${showPnl ? `<td class="num">${pnlOf(r)}</td>` : ""}
         <td class="num">${status(r)}</td></tr>`).join("")}</tbody></table></div>
     <div class="mlist">${list.map((r) => `<div class="mrow off">
         <div class="mtop"><span class="rk">${place(r)}</span>${avatar(r)}<span class="nm">${name(r)}</span><span class="mmain num"><span class="mainv">${money(r.vol, false)}</span></span></div>
-        <div class="mstats num"><span><i>PnL</i>${pnlOf(r)}</span><span>${status(r)}</span></div>
+        <div class="mstats num">${showPnl ? `<span><i>PnL</i>${pnlOf(r)}</span>` : ""}<span>${status(r)}</span></div>
       </div>`).join("")}</div>
     ${all.length > compShown ? `<div class="more"><button class="btn" id="c-more">Show all ${all.length}</button></div>` : ""}`;
 }
