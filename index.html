@@ -487,7 +487,7 @@
     .facts { grid-template-columns: 1fr 1fr; }
     .fact:nth-child(3) { grid-column: 1 / -1; border-left: 0; border-top: 1px solid var(--line); }
   }
-  @media (max-width: 380px) { #race-tx { display: none; } }
+  @media (max-width: 560px) { #race-tx, .race-acts .tx { display: none; } } /* phones: icons only; the buttons keep their aria-labels */
   @media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
   /* the right-hand card: today's biggest single wins */
   .wins { padding: 22px 24px; display: flex; flex-direction: column; gap: 12px; }
