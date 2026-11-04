@@ -38,4 +38,9 @@ jobs:
           echo '{"git":{"deploymentEnabled":false}}' > vercel.json
           git add days.json state.json vercel.json
           git commit -q -m "data: board"
-          git push -f "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" data
+          # GitHub now and then turns a push away for a moment (twice in 100 runs): try again before failing the run
+          for i in 1 2 3; do
+            git push -f "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" data && exit 0
+            echo "push failed (try $i), retrying"; sleep $((i * 15))
+          done
+          exit 1
